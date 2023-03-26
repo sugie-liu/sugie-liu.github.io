@@ -5,8 +5,8 @@
     <description></description>
     <link>http://localhost:4000/</link>
     <atom:link href="http://localhost:4000/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Sun, 26 Mar 2023 22:51:06 +0800</pubDate>
-    <lastBuildDate>Sun, 26 Mar 2023 22:51:06 +0800</lastBuildDate>
+    <pubDate>Sun, 26 Mar 2023 23:42:42 +0800</pubDate>
+    <lastBuildDate>Sun, 26 Mar 2023 23:42:42 +0800</lastBuildDate>
     <generator>Jekyll v4.3.2</generator>
     
       <item>
@@ -122,6 +122,22 @@
       </item>
     
       <item>
+        <title>imu预积分</title>
+        <description>
+在vio系统中，imu预积分是常用的技术手段之一，本文旨在介绍常见的预积分中的数学原理
+</description>
+        <pubDate>Fri, 24 Mar 2023 00:00:00 +0800</pubDate>
+        <link>http://localhost:4000/2023/03/24/imu%E9%A2%84%E7%A7%AF%E5%88%86/</link>
+        <guid isPermaLink="true">http://localhost:4000/2023/03/24/imu%E9%A2%84%E7%A7%AF%E5%88%86/</guid>
+        
+        <category>数学公式</category>
+        
+        
+        <category>SLAM</category>
+        
+      </item>
+    
+      <item>
         <title>HF-Net 论文阅读</title>
         <description>
 最近,提出了众多通过深度学习实现图象匹配和召回的网络,这篇文章在分层定位方法中.使用这些网络提取的特征点,取得了鲁棒性和精度的平衡。作者利用全局描述子和局部特征实现了由粗到精的位姿估计过程，并且在大型环境中取得了不错的效果。为了进一步提高这个方法的的有效性，该文章提出了一种可以同时估计出局部和全局特征的卷积神经网络，最大限度的共享计算量，作者称之为分层特征网络（HF-NET）。并且展示了这种压缩模型可以使用多任务蒸馏这种灵活的方式得到训练。
@@ -147,22 +163,6 @@
         <pubDate>Fri, 24 Mar 2023 00:00:00 +0800</pubDate>
         <link>http://localhost:4000/2023/03/24/ESKF%E6%80%BB%E7%BB%93/</link>
         <guid isPermaLink="true">http://localhost:4000/2023/03/24/ESKF%E6%80%BB%E7%BB%93/</guid>
-        
-        <category>数学公式</category>
-        
-        
-        <category>SLAM</category>
-        
-      </item>
-    
-      <item>
-        <title>状态估计</title>
-        <description>
-状态估计是SLAM算法中必不可少一部分，本文介绍了线性以及非线性系统状态估计的一些常用方法。
-</description>
-        <pubDate>Thu, 23 Mar 2023 00:00:00 +0800</pubDate>
-        <link>http://localhost:4000/2023/03/23/%E7%8A%B6%E6%80%81%E4%BC%B0%E8%AE%A1/</link>
-        <guid isPermaLink="true">http://localhost:4000/2023/03/23/%E7%8A%B6%E6%80%81%E4%BC%B0%E8%AE%A1/</guid>
         
         <category>数学公式</category>
         

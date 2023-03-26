@@ -6,15 +6,15 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title>slam数学基础—姿态变换</title>
-    <meta name="description" content="本质主要介绍了两种姿态的变换关系，分别是欧拉角与旋转矩阵，四元数与旋转矩阵">
+    <title>imu预积分</title>
+    <meta name="description" content="在vio系统中，imu预积分是常用的技术手段之一，本文旨在介绍常见的预积分中的数学原理">
 
     <link rel="shortcut icon" href="/favicon.ico?" type="image/x-icon">
     <link rel="icon" href="/favicon.ico?" type="image/x-icon">
     <link rel="stylesheet" href="https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="https://at.alicdn.com/t/font_8v3czwksspqlg14i.css">
     <link rel="stylesheet" href="/css/main.css ">
-    <link rel="canonical" href="http://localhost:4000/2023/03/24/slam%E6%95%B0%E5%AD%A6%E5%9F%BA%E7%A1%80-%E5%A7%BF%E6%80%81%E5%8F%98%E6%8D%A2/">
+    <link rel="canonical" href="http://localhost:4000/2023/03/24/imu%E9%A2%84%E7%A7%AF%E5%88%86/">
     <link rel="alternate" type="application/rss+xml" title="元宝的杂货铺" href="http://localhost:4000/feed.xml ">
 
 
@@ -143,7 +143,7 @@
 
         <div class="page clearfix" post>
     <div class="left">
-        <h1>slam数学基础—姿态变换</h1>
+        <h1>imu预积分</h1>
         <div class="label">
 
             <div class="label-card">
@@ -185,8 +185,8 @@
   <i class="fa fa-tags"></i>
   
     
-        <!--a href="/tag/#%E5%85%AC%E5%BC%8F%E6%8E%A8%E5%AF%BC" title="Tag: 公式推导" rel="tag">公式推导</a-->
-        <a href="/tag/#公式推导" title="Tag: 公式推导" rel="tag">公式推导</a>
+        <!--a href="/tag/#%E6%95%B0%E5%AD%A6%E5%85%AC%E5%BC%8F" title="Tag: 数学公式" rel="tag">数学公式</a-->
+        <a href="/tag/#数学公式" title="Tag: 数学公式" rel="tag">数学公式</a>
     
   
 
@@ -198,45 +198,78 @@
         <hr>
         <article itemscope itemtype="http://schema.org/BlogPosting">
         <ul id="markdown-toc">
-  <li><a href="#欧拉角与旋转矩阵" id="markdown-toc-欧拉角与旋转矩阵">欧拉角与旋转矩阵</a></li>
-  <li><a href="#四元数与旋转矩阵" id="markdown-toc-四元数与旋转矩阵">四元数与旋转矩阵</a></li>
+  <li><a href="#1姿态预积分" id="markdown-toc-1姿态预积分">1、姿态预积分</a>    <ul>
+      <li><a href="#vins" id="markdown-toc-vins">VINS</a></li>
+      <li><a href="#orb-slam3" id="markdown-toc-orb-slam3">ORB-SLAM3</a>        <ul>
+          <li><a href="#方法1" id="markdown-toc-方法1">方法1</a></li>
+          <li><a href="#方法2" id="markdown-toc-方法2">方法2</a></li>
+          <li><a href="#参考文献" id="markdown-toc-参考文献">参考文献</a></li>
+        </ul>
+      </li>
+    </ul>
+  </li>
 </ul>
 
-<p>本质主要介绍了两种姿态的变换关系，分别是欧拉角与旋转矩阵，四元数与旋转矩阵</p>
+<p>在vio系统中，imu预积分是常用的技术手段之一，本文旨在介绍常见的预积分中的数学原理</p>
 
-<h2 id="欧拉角与旋转矩阵">欧拉角与旋转矩阵</h2>
+<h2 id="1姿态预积分">1、姿态预积分</h2>
 
-\[R({\theta}_x,{\theta}_y,{\theta}_z)=R_z({\theta}_z)R_y({\theta}_y)R_x({\theta}_x)=\begin{bmatrix}cos({\theta}_z) &amp; -sin({\theta}_z) &amp; 0 \\
-sin({\theta}_z) &amp; cos({\theta}_z) &amp; 0 \\
-0 &amp; 0 &amp; 1 
-\end{bmatrix} 
+<p>姿态与积分如下：</p>
 
-\begin{bmatrix} cos({\theta}_y)&amp; 0 &amp; sin({\theta}_y)\\
- 0 &amp;1 &amp; 0 &amp; \\
- -sin({\theta}_y) 
- &amp; 0 &amp; cos({\theta}_y)
- \end{bmatrix}
+\[{\gamma}^{b_k}_{b_{k+1}} = \int_{t \in[t_k,t_{k+1}]} \frac 1 2 \Omega(\hat{\omega_t} - b_{\omega_t} - n_\omega ) {\gamma}^{b_k}_{t}\]
 
-\begin{bmatrix} 1 &amp; 0 &amp; 0\\
-0 &amp; cos({\theta}_x) &amp; -sin({\theta}_x)\\
-0 &amp; sin({\theta}_x) &amp; cos({\theta}_x)
-\end{bmatrix}
-=
-\begin{bmatrix}c_zc_y &amp; c_zs_ys_x-s_zc_x &amp; c_zs_yc_x+s_zs_x\\
-s_zc_y &amp; s_zs_ys_x+c_zc_x &amp; s_zs_yc_x-c_zs_x\\
--s_y &amp; c_ys_x &amp; c_yc_x
-\end{bmatrix}\]
+<p>这部分的重点在于对姿态求解雅可比矩阵,形如下式：</p>
 
-<h2 id="四元数与旋转矩阵">四元数与旋转矩阵</h2>
+\[\frac {\partial R_1R_2} {R_1}\]
 
-<p>设四元数为$q=q_w+q_x\mathbf{i}+q_y\mathbf{j}+q_z\mathbf{k}$</p>
+<h3 id="vins">VINS</h3>
 
-<p>旋转矩阵 $\small R $ 与 四元数 $ q $ 的关系可以表示为：</p>
+<p>由于李群对于加法是不封闭的，因此在VINS中转换成了对四元数求导，imu姿态的残差定义为：</p>
 
-\[R=\begin{bmatrix}q_{w}^{2}+q_{x}^{2}-q_{y}^{2}-q_{x}^{2} &amp; 2(q_xq_y-q_wq_z) &amp;2(q_xq_z+q_wq_y)\\
-2(q_xq_y+q_wq_z) &amp; q_{w}^{2}-q_{x}^{2}+q_{y}^{2}-q_{z}^{2} &amp; 2(q_yq_z-q_wq_x) \\
-2(q_xq_z-q_wq_y) &amp;2(q_yq_z+q_wq_x) &amp; q_{w}^{2}-q_{x}^{2}-q_{y}^{2}+q_{z}^{2}
-\end{bmatrix}\]
+\[r_{\theta} = \left [[{\gamma}^{b_k}_{b_{k+1}}]^{-1} {q^w_{b_k}}^{-1}q^w_{b_{k+1}} \right ]_{xyz}\]
+
+<p>对$q^w_{b_k}$的求导转换成了对其扰动的求导，即</p>
+
+\[\frac {\partial r_{\theta}} {q^w_{b_k}} \Rightarrow \frac {\partial r_{\theta}} {\delta \theta_{b_k}} = \lim_{ \delta \theta_{b_k} \rightarrow 0} = \frac { \left [[{\gamma}^{b_k}_{b_{k+1}}]^{-1} \left ( {q^w_{b_k} \begin{bmatrix} 1 \\
+\frac {1}{2} \delta \theta_{b_k} \end{bmatrix} }\right ) ^{-1}q^w_{b_{k+1}} \right ] - \left [[{\gamma}^{b_k}_{b_{k+1}}]^{-1} {q^w_{b_k}}^{-1}q^w_{b_{k+1}} \right ]}{\delta \theta_{b_k}}\]
+
+<h3 id="orb-slam3">ORB-SLAM3</h3>
+
+<p>在orb-slam3中则将残差定义为李代数，即</p>
+
+\[r_{\theta}  = Log ( \Delta \mathbf{R}_{i,i+1}^T\mathbf{R}_i^T\mathbf{R}_{i+1})\]
+
+\[\frac {\partial r_{\theta}} {q^w_{b_k}} \Rightarrow \frac {\partial r_{\theta}} {\delta \theta_{b_k}}  = \frac {\partial Log ( \Delta \mathbf{R}_{i,i+1}^T (\mathbf{R}_i exp(\delta \theta_{b_k}))^T\mathbf{R}_{i+1})}{\delta \theta_{b_k}}\]
+
+<h5 id="方法1">方法1</h5>
+
+\[\frac {\partial r_{\theta}} {\delta \theta_{b_k}}  = \lim_{ \delta \theta_{b_k} \rightarrow 0}  \frac {\partial Log ( \Delta \mathbf{R}_{i,i+1}^T (\mathbf{R}_i exp(\delta \theta_{b_k}))^T\mathbf{R}_{i+1} (\Delta \mathbf{R}_{i,i+1}^T\mathbf{R}_i^T\mathbf{R}_{i+1})^{-1})}{\delta \theta_{b_k}}\]
+
+\[=\lim_{ \delta \theta_{b_k} \rightarrow 0}  \frac {\partial Log ( \Delta \mathbf{R}_{i,i+1}^T exp(-\delta \theta_{b_k})\mathbf{R}_i ^T\mathbf{R}_{i+1} (\Delta \mathbf{R}_{i,i+1}^T\mathbf{R}_i^T\mathbf{R}_{i+1})^{-1})}{\delta \theta_{b_k}}\]
+
+\[=\lim_{ \delta \theta_{b_k} \rightarrow 0}  \frac {\partial Log ( exp(-(Adj(\Delta \mathbf{R}_{i,i+1}^T)\delta \theta_{b_k})^{\wedge}) \Delta \mathbf{R}_{i,i+1}^T \mathbf{R}_i ^T\mathbf{R}_{i+1} (\Delta \mathbf{R}_{i,i+1}^T\mathbf{R}_i^T\mathbf{R}_{i+1})^{-1})}{\delta \theta_{b_k}}\]
+
+\[=\lim_{ \delta \theta_{b_k} \rightarrow 0}  \frac {\partial Log ( exp(-(Adj(\Delta \mathbf{R}_{i,i+1}^T)\delta \theta_{b_k})^{\wedge})}{\delta \theta_{b_k}}\]
+
+<p>即，</p>
+
+\[\frac {\partial r_{\theta}} {\delta \theta_{b_k}}  =  - \Delta \mathbf{R}_{i,i+1}^T\]
+
+<h5 id="方法2">方法2</h5>
+
+\[\frac {\partial r_{\theta}} {\delta \theta_{b_k}} =  \frac {\partial Log ( \Delta \mathbf{R}_{i,i+1}^T (\mathbf{R}_i exp(\delta \theta_{b_k}))^T\mathbf{R}_{i+1})}{\delta \theta_{b_k}}\]
+
+\[=  \frac {\partial Log ( \Delta \mathbf{R}_{i,i+1}^T  exp(-\delta \theta_{b_k})\mathbf{R}_i ^T\mathbf{R}_{i+1})}{\delta \theta_{b_k}}\]
+
+\[=  \frac {\partial Log ( \Delta \mathbf{R}_{i,i+1}^T  \mathbf{R}_i ^T\mathbf{R}_{i+1} exp(- \mathbf{R}_{i+1} ^T \mathbf{R}_{i} \delta \theta_{b_k}))}{\delta \theta_{b_k}}\]
+
+\[\approx \frac {\partial J_R ( \Delta \mathbf{R}_{i,i+1}^T  \mathbf{R}_i ^T\mathbf{R}_{i+1} )(- \mathbf{R}_{i+1} ^T\mathbf{R}_{i} \delta \theta_{b_k}))}{\delta \theta_{b_k}}\]
+
+\[\frac {\partial r_{\theta}} {\delta \theta_{b_k}} =-J_R ( \Delta \mathbf{R}_{i,i+1}^T  \mathbf{R}_i ^T\mathbf{R}_{i+1} ) \mathbf{R}_{i+1} ^T\mathbf{R}_{i}\]
+
+<h5 id="参考文献">参考文献</h5>
+
+<p>[1]<a href="http:\\www.ethaneade.org\lie.pdf">Lie Groups for 2D and 3D Transformations</a></p>
 
         </article>
         <hr>
@@ -247,40 +280,12 @@ s_zc_y &amp; s_zs_ys_x+c_zc_x &amp; s_zs_yc_x-c_zs_x\\
             
                 
                     
-                
-            
-        
-            
-            
-                
-                    
-                
-            
-        
-            
-            
-                
-                    
-                
-            
-        
-            
-            
-                
-                    
-                
-            
-        
-            
-            
-                
-                    
                         
                         <h2 id="similar_posts">Similar Posts</h2>
                         <ul>
                         
                         <li class="relatedPost">
-                            <a href="/2023/03/24/slam%E6%95%B0%E5%AD%A6%E5%9F%BA%E7%A1%80/">SLAM数学基础
+                            <a href="/2023/03/24/%E9%87%8D%E8%AF%BBMSCKF/">重读MSCKF
                             
                             </a>
                         </li>
@@ -310,6 +315,16 @@ s_zc_y &amp; s_zs_ys_x+c_zc_x &amp; s_zs_yc_x-c_zs_x\\
                     
                 
             
+        
+            
+            
+                
+                    
+                
+            
+        
+            
+            
                 
                     
                 
@@ -325,6 +340,42 @@ s_zc_y &amp; s_zs_ys_x+c_zc_x &amp; s_zs_yc_x-c_zs_x\\
             
             
                 
+                    
+                
+            
+                
+                    
+                
+            
+        
+            
+            
+                
+                    
+                        
+                        <li class="relatedPost">
+                            <a href="/2023/03/24/ESKF%E6%80%BB%E7%BB%93/">ESKF总结
+                            
+                            </a>
+                        </li>
+                        
+                        
+                    
+                
+            
+        
+            
+            
+                
+                    
+                        
+                        <li class="relatedPost">
+                            <a href="/2023/03/23/%E7%8A%B6%E6%80%81%E4%BC%B0%E8%AE%A1/">状态估计
+                            
+                            </a>
+                        </li>
+                        
+                        
                     
                 
             
@@ -336,13 +387,13 @@ s_zc_y &amp; s_zs_ys_x+c_zc_x &amp; s_zs_yc_x-c_zs_x\\
         <div class="post-recent">
     <div class="pre">
         
-        <p><strong>上一篇</strong> <a href="/2023/03/24/orb-slam3/">orb-slam3论文阅读</a></p>
+        <p><strong>上一篇</strong> <a href="/2023/03/24/HF-Net%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB/">HF-Net 论文阅读</a></p>
         
     </div>
     <div class="nex">
 
         
-        <p><strong>下一篇</strong> <a href="/2023/03/24/slam%E6%95%B0%E5%AD%A6%E5%9F%BA%E7%A1%80/">SLAM数学基础</a></p>
+        <p><strong>下一篇</strong> <a href="/2023/03/24/orb-slam3/">orb-slam3论文阅读</a></p>
         
     </div>
 </div>
@@ -360,8 +411,8 @@ s_zc_y &amp; s_zs_ys_x+c_zc_x &amp; s_zs_yc_x-c_zs_x\\
      */
 
     var disqus_config = function() {
-        this.page.url = 'http://localhost:4000/2023/03/24/slam%E6%95%B0%E5%AD%A6%E5%9F%BA%E7%A1%80-%E5%A7%BF%E6%80%81%E5%8F%98%E6%8D%A2/'; // Replace PAGE_URL with your page's canonical URL variable
-        this.page.identifier = 'http://localhost:4000/2023/03/24/slam%E6%95%B0%E5%AD%A6%E5%9F%BA%E7%A1%80-%E5%A7%BF%E6%80%81%E5%8F%98%E6%8D%A2/'; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+        this.page.url = 'http://localhost:4000/2023/03/24/imu%E9%A2%84%E7%A7%AF%E5%88%86/'; // Replace PAGE_URL with your page's canonical URL variable
+        this.page.identifier = 'http://localhost:4000/2023/03/24/imu%E9%A2%84%E7%A7%AF%E5%88%86/'; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
     };
 
     (function() { // DON'T EDIT BELOW THIS LINE
