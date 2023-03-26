@@ -5,8 +5,8 @@
     <description></description>
     <link>http://localhost:4000/</link>
     <atom:link href="http://localhost:4000/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Sun, 26 Mar 2023 15:40:49 +0800</pubDate>
-    <lastBuildDate>Sun, 26 Mar 2023 15:40:49 +0800</lastBuildDate>
+    <pubDate>Sun, 26 Mar 2023 20:40:16 +0800</pubDate>
+    <lastBuildDate>Sun, 26 Mar 2023 20:40:16 +0800</lastBuildDate>
     <generator>Jekyll v4.3.2</generator>
     
       <item>
@@ -86,6 +86,24 @@
         
         
         <category>SLAM</category>
+        
+      </item>
+    
+      <item>
+        <title>HF-Net 论文阅读</title>
+        <description>
+最近,提出了众多通过深度学习实现图象匹配和召回的网络,这篇文章在分层定位方法中.使用这些网络提取的特征点,取得了鲁棒性和精度的平衡。作者利用全局描述子和局部特征实现了由粗到精的位姿估计过程，并且在大型环境中取得了不错的效果。为了进一步提高这个方法的的有效性，该文章提出了一种可以同时估计出局部和全局特征的卷积神经网络，最大限度的共享计算量，作者称之为分层特征网络（HF-NET）。并且展示了这种压缩模型可以使用多任务蒸馏这种灵活的方式得到训练。
+</description>
+        <pubDate>Fri, 24 Mar 2023 00:00:00 +0800</pubDate>
+        <link>http://localhost:4000/2023/03/24/HF-Net%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB/</link>
+        <guid isPermaLink="true">http://localhost:4000/2023/03/24/HF-Net%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB/</guid>
+        
+        <category>深度学习</category>
+        
+        <category>图片召回</category>
+        
+        
+        <category>DeepLearning</category>
         
       </item>
     
