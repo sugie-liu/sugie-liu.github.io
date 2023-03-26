@@ -5,9 +5,25 @@
     <description></description>
     <link>http://localhost:4000/</link>
     <atom:link href="http://localhost:4000/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Sun, 26 Mar 2023 15:12:12 +0800</pubDate>
-    <lastBuildDate>Sun, 26 Mar 2023 15:12:12 +0800</lastBuildDate>
+    <pubDate>Sun, 26 Mar 2023 15:40:49 +0800</pubDate>
+    <lastBuildDate>Sun, 26 Mar 2023 15:40:49 +0800</lastBuildDate>
     <generator>Jekyll v4.3.2</generator>
+    
+      <item>
+        <title>栅格地图更新原理</title>
+        <description>
+到目前为止，最常用的占用栅格地图是二维平面地图，二维地图通常也机器人平面导航的选择，当然占用栅格地图技术可以推广到三维，但是计算量非常大。在占据栅格地图中每个cell分为occupied和free两种状态，可以分别用“1”和“0”表示。
+</description>
+        <pubDate>Fri, 24 Mar 2023 00:00:00 +0800</pubDate>
+        <link>http://localhost:4000/2023/03/24/%E6%A0%85%E6%A0%BC%E5%9C%B0%E5%9B%BE%E6%9B%B4%E6%96%B0%E5%8E%9F%E7%90%86/</link>
+        <guid isPermaLink="true">http://localhost:4000/2023/03/24/%E6%A0%85%E6%A0%BC%E5%9C%B0%E5%9B%BE%E6%9B%B4%E6%96%B0%E5%8E%9F%E7%90%86/</guid>
+        
+        <category>论文阅读</category>
+        
+        
+        <category>SLAM</category>
+        
+      </item>
     
       <item>
         <title>三角测量</title>

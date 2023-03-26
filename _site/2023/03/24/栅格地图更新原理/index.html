@@ -6,15 +6,15 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title>ESKF总结</title>
-    <meta name="description" content="本文主要介绍了imu在slam中常用的ESKF基本的数学原理">
+    <title>栅格地图更新原理</title>
+    <meta name="description" content="到目前为止，最常用的占用栅格地图是二维平面地图，二维地图通常也机器人平面导航的选择，当然占用栅格地图技术可以推广到三维，但是计算量非常大。在占据栅格地图中每个cell分为occupied和free两种状态，可以分别用“1”和“0”表示。">
 
     <link rel="shortcut icon" href="/favicon.ico?" type="image/x-icon">
     <link rel="icon" href="/favicon.ico?" type="image/x-icon">
     <link rel="stylesheet" href="https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="https://at.alicdn.com/t/font_8v3czwksspqlg14i.css">
     <link rel="stylesheet" href="/css/main.css ">
-    <link rel="canonical" href="http://localhost:4000/2023/03/24/ESKF%E6%80%BB%E7%BB%93/">
+    <link rel="canonical" href="http://localhost:4000/2023/03/24/%E6%A0%85%E6%A0%BC%E5%9C%B0%E5%9B%BE%E6%9B%B4%E6%96%B0%E5%8E%9F%E7%90%86/">
     <link rel="alternate" type="application/rss+xml" title="元宝的杂货铺" href="http://localhost:4000/feed.xml ">
 
 
@@ -141,7 +141,7 @@
 
         <div class="page clearfix" post>
     <div class="left">
-        <h1>ESKF总结</h1>
+        <h1>栅格地图更新原理</h1>
         <div class="label">
 
             <div class="label-card">
@@ -183,8 +183,8 @@
   <i class="fa fa-tags"></i>
   
     
-        <!--a href="/tag/#%E6%95%B0%E5%AD%A6%E5%85%AC%E5%BC%8F" title="Tag: 数学公式" rel="tag">数学公式</a-->
-        <a href="/tag/#数学公式" title="Tag: 数学公式" rel="tag">数学公式</a>
+        <!--a href="/tag/#%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB" title="Tag: 论文阅读" rel="tag">论文阅读</a-->
+        <a href="/tag/#论文阅读" title="Tag: 论文阅读" rel="tag">论文阅读</a>
     
   
 
@@ -196,178 +196,43 @@
         <hr>
         <article itemscope itemtype="http://schema.org/BlogPosting">
         <ul id="markdown-toc">
-  <li><a href="#四元数" id="markdown-toc-四元数">四元数</a></li>
-  <li><a href="#imu-propagation" id="markdown-toc-imu-propagation">IMU Propagation</a></li>
-  <li><a href="#imu-observation" id="markdown-toc-imu-observation">IMU Observation</a>    <ul>
-      <li><a href="#参考文献" id="markdown-toc-参考文献">参考文献</a></li>
-    </ul>
-  </li>
+  <li><a href="#参考文献" id="markdown-toc-参考文献">参考文献</a></li>
 </ul>
 
-<p>本文主要介绍了imu在slam中常用的ESKF基本的数学原理</p>
+<p>到目前为止，最常用的占用栅格地图是二维平面地图，二维地图通常也机器人平面导航的选择，当然占用栅格地图技术可以推广到三维，但是计算量非常大。在占据栅格地图中每个cell分为occupied和free两种状态，可以分别用“1”和“0”表示。</p>
 
-<h2 id="四元数">四元数</h2>
+<p>第i个cell的状态表示为 $\small m_i$ ，该栅格被占用的概率可以表示为$\small p(m_i=1)$，free的概率可以表示为$\small p(m_i=0)$.在占用栅格建图算法中需要计算在给定测量值的情况下计算后验概率，即，$ \small p(m_i | z_{1:t}) $ , 在gmapping和cartographer中用 $ \small odds(p)$ 来表示栅格的状态，即</p>
 
-<p>四元数常用表示方法有Hamilton（Eigen等库使用）和JPL（MSCKF使用），本文采用的四元数为右手系四元数(Hamilton) . 记, $\small q=\begin{bmatrix} q_w <br />
- q_v \end{bmatrix}$</p>
+\[odds(p_t) = \frac {p(m_i | z_{1:t})}{1-p(m_i | z_{1:t})}\]
 
-\[q_1 \otimes q_2=[q_1]_L q_2=[q_2]_R q_1\]
+<p>由贝叶斯公式可知，</p>
 
-<p>式中,</p>
+\[p(m_i=1 |z_{1:t}) = \frac {p(z_{t} | m_i=1) p(m_i=1 | z_{1:t-1})}{p(z_t |z_{1:t-1})}\]
 
-\[[q]_L=q_w I+\begin{bmatrix} 0 &amp; -q_{v}^{T}\\
- q_v&amp;[q_v]_{\times}\end{bmatrix}\]
+\[p(m_i=0 |z_{1:t}) = \frac {p(z_{t} | m_i=0) p(m_i=0 |z_{1:t-1})}{p(z_t |z_{1:t-1})}\]
 
-\[[q]_R=q_w I+\begin{bmatrix} 0&amp; -q_{v}^{T}\\
- q_v&amp;-[q_v]_{\times}\end{bmatrix}\]
+<p>代入，可得</p>
 
-<h2 id="imu-propagation">IMU Propagation</h2>
+\[odds(p_t) = \frac {p(z_{t} | m_i=1) p(m_i=1|z_{1:t-1})} {p(z_{t} | m_i=0) p(m_i=0|z_{1:t-1})} = \frac  {p(z_{t} | m_i=1) } {p(z_{t} | m_i=0)}odds(p_{t-1}) \tag{1}\]
 
-<p>imu的估计状态为$ \small X_t= \begin{bmatrix}  p&amp; v&amp; q&amp; ba&amp; bg \end{bmatrix} ^T $,运动方程为
-\(\left\{ \begin{aligned}\dot{p}_t&amp;=v_t \\
-\dot{v}_t&amp;=a_t \\
-\dot{q}_t&amp;=\frac 1 2 q_t \otimes \omega_t \\
-\dot{a}_{bt}&amp;={n}_{ba} \\
-\dot{\omega}_bt&amp;=n_{bg} \end{aligned} \right. \tag{1}\)</p>
+<p>激光对栅格的观测有占用和自由两种状态，分别可以表示为$p(z_t = 1)$，$p(z_t=0)$。因此对$odds(p)$的更新存在两种方式，即</p>
 
-<p>将imu加计和陀螺的测量值带入(1)可得</p>
+\[odds(p_t) = \frac  {p(z_{t}=1 | m_i=1) } {p(z_{t}=1 | m_i=0)}odds(p_{t-1}) ={pro}_{hit}odds(p_{t-1})\]
 
-\[\left \{ \begin{aligned}
-\dot{p}_t&amp;=v_t\\
-\dot{v}_t&amp;=R_t \left(  a_m-a_{bt} \right) +g_t\\
-\dot{q}_t&amp;=\frac 1 2 q_t \otimes \left( \omega_m-\omega_{bt} \right) \\
-\dot{a}_{bt}&amp;={n}_{ba}\\
-\dot{\omega}_{bt}&amp;=n_{bg} \end{aligned} \right. \tag{2}\]
+\[odds(p_t) = \frac  {p(z_{t}=0 | m_i=1) } {p(z_{t}=0 | m_i=0)}odds(p_{t-1}) ={pro}_{miss}odds(p_{t-1})\]
 
-<p>定义误差为</p>
+<p>式中，$pro_{hit},pro_{miss}$均为定值。</p>
 
-\[p_t=\hat{p}_t+\delta p \tag{3a}\]
+<p>为了提高计算效率可对式（1）两边取对数，即可将乘法运算简化为加法运算
+\(log(odds(p_t)) = log ( \frac  {p(z_{t} | m_i=1) } {p(z_{t} | m_i=0)}) +log(odds(p_{t-1}))\)</p>
 
-\[{v}_t=\hat{v}_t+\delta v \tag{3b}\]
-
-\[{q}_t=\hat{ q}_t \otimes \delta {q}\tag{3c}\]
-
-\[{a}_{bt}={a}_b+ \delta {a}_b \tag{3d}\]
-
-\[{\omega}_{bt}= {\omega}_{b}+ \delta {\omega}_{b} \tag{3e}\]
-
-<ol>
-  <li>对于式 $\small (3a)$ ,两边求导可得</li>
-</ol>
-
-\[\begin{aligned} \dot{p}_t  &amp; = \dot{\hat{p}}_t+\delta \dot{p}\\
-{v}_t &amp;=\hat{v}_t+\delta \dot{p}\end{aligned}\]
-
-<p>即,
-\(\small \delta \dot{p}=\delta v\)</p>
-
-<ol>
-  <li>对于式$ \small (3b)$,两边求导可得</li>
-</ol>
-
-\[\begin{aligned} \dot{v}_t  &amp; = \dot{\hat{v}}_t+\delta \dot{v}\\
-R_t \left(  a_m-a_{bt} \right) +g_t  &amp;=\hat{R}_t \left(  a_m-a_{b}-n_a \right) +g_t +\delta \dot{v}\\
-\hat{R}_t \left(  I+[\delta \theta]_{\times}\right)\left(  a_m-a_{bt} \right) &amp;=\hat{R}_t \left(  a_m-a_{b}-n_a \right)  +\delta \dot{v}\\
-\delta \dot{v}&amp;=\hat{R}_t [\delta \theta]_{\times} \left(  a_m-a_{bt}\right) +\hat{R}_t  \left(  -\delta a_b-n_a \right)
-\end{aligned}\]
-
-<p>即,
-\(\small \delta \dot{v}=- \hat{R}_t [  a_m-a_{bt}]_{\times}  \delta \theta-\hat{R}_t  \delta a_b-\hat{R}_t  n_a\)</p>
-
-<ol>
-  <li>对于式$(3c)$,两边求导可得</li>
-</ol>
-
-\[\begin{aligned} \dot{q}_t  &amp; = \dot{\left(\hat{ q}_t \otimes \delta {q}\right)}\\
-\frac 1 2 q_t \otimes \omega_t &amp;=\dot{\\hat{q}}_t \otimes \delta q+\hat{q}_t\otimes \delta \dot{q}\\
-\frac 1 2 q_t \otimes \left(\omega_m-\omega_{bt}\right) &amp;=\frac 1 2{\hat{q}}_t \otimes \left(\omega_m-\omega_{b}-n_{\omega}\right) \otimes \delta q+\hat{q}_t\otimes \delta \dot{q}\\
-\frac 1 2 \hat{q}_t \otimes \delta q \otimes \left(\omega_m-\omega_{bt}\right) &amp;=\frac 1 2\hat{q}_t \otimes \left(\omega_m-\omega_{b}-n_{\omega}\right) \otimes \delta q+\hat{q}_t\otimes \delta \dot{q}\\
-\delta q \otimes \left(\omega_m-\omega_{bt}\right) &amp;=\left(\omega_m-\omega_{b}-n_{\omega}\right) \otimes \delta q+2 \delta \dot{q} \end{aligned}\]
-
-<p>设$\small \delta q=\begin{bmatrix}1 <br />
-\frac 1 2 {\delta \theta} \end{bmatrix} $,带入上式可得</p>
-
-\[\begin{aligned}
-\begin{bmatrix} 0 \\
-\dot{\delta \theta} \end{bmatrix} &amp;= [\omega_m-\omega_{bt}]_R \delta q -[\omega_m-\omega_{b}-n_{\omega}]_L \delta q \\
-&amp;=\begin{bmatrix}0 &amp;-\left(\omega_m-\omega_{bt}-\omega_m+\omega_b+n_\omega \right)^T \\
-\left(\omega_m-\omega_{bt}-\omega_m+\omega_b+n_\omega \right) &amp; -[\omega_m-\omega_{bt}+\omega_m-\omega_b-n_\omega]_{\times}\end{bmatrix} \begin{bmatrix} 1 \\
-\delta \theta /2 \end{bmatrix}\\
-&amp;=\begin{bmatrix}0 &amp; -\left( -\delta \omega_b+n_{\omega}\right)^T \\
-\left(-\delta \omega_b+n_{\omega}\right) &amp; -[2 (\omega_m-\omega_{b})-\delta \omega_b-n_\omega]_{\times}\end{bmatrix} \begin{bmatrix} 1 \\
-\delta \theta /2\end{bmatrix}
-\end{aligned}\]
-
-<p>忽略高阶小量,化简得
-\(\dot{\delta \theta}=-[\omega_m-\omega_b]_{\times}\delta \theta -\delta \omega_b+n_{\omega}\)</p>
-
-<p>整理以上各式可得</p>
-
-\[\begin{bmatrix} \dot{\delta p}\\
-\dot{\delta v} \\
-\dot{\delta \theta} \\
-\dot{\delta a_b} \\
-\dot{\delta \omega_b}\end{bmatrix}=\begin{bmatrix} 0&amp;I&amp;0&amp;0&amp;0 \\
-0&amp;0&amp;-R[a_m-a_b]_{\times}&amp;-R&amp;0 \\
-0&amp;0&amp;-[\omega_m-\omega_b]_{\times}&amp;0&amp;-I\\
-0&amp;0&amp;0&amp;0&amp;0\\
-0&amp;0&amp;0&amp;0&amp;0\\
-\end{bmatrix}
-\begin{bmatrix} {\delta p}\\
-{\delta v}\\
-{\delta \theta}\\
-{\delta a_b} \\
-{\delta \omega_b}\end{bmatrix}+
-\begin{bmatrix} 0&amp;0&amp;0&amp;0\\
--R&amp;0&amp;0&amp;0\\
-0&amp;-I&amp;0&amp;0\\
-0&amp;0&amp;I&amp;0\\
-0&amp;0&amp;0&amp;I \end{bmatrix}
-\begin{bmatrix}n_a\\
-n_g\\
-n_{ba}\\
-n_{bg}\end{bmatrix}\]
-
-<h2 id="imu-observation">IMU Observation</h2>
-
-<p>1.重力观测
-\(y=R^T \begin{bmatrix}0\\
-0\\
-1
-\end{bmatrix}=
-\begin{bmatrix} 2(q_xq_z-q_wq_y)\\
-2(q_yq_z+q_wq_x)\\
-q_{w}^2-q_{x}^2-q_{y}^2+q_{z}^2 
-\end{bmatrix}\)</p>
-
-\[H=\frac {\partial y} {\partial \delta x}=\frac {\partial y} {\partial X_t} \frac {\partial X_t} {\partial \delta x}=H_xH_{\delta x}\]
-
-<p>其中,
-\(H_x= \begin{bmatrix} -2q_y&amp;2q_z&amp;-2q_w&amp;2q_x&amp;0\\
-2q_x&amp;2q_w&amp;2q_z&amp;2q_y&amp;0\\
-2q_w&amp;-2q_x&amp;-2q_y&amp;2q_z&amp;0
-\end{bmatrix}\)</p>
-
-\[H_{\delta x}= \begin{bmatrix} Q_{\delta \theta}&amp;0\\
-0&amp;I \end{bmatrix}\]
-
-<p>其中,</p>
-
-\[Q_{\delta \theta}= \frac {\partial (q \otimes \delta q)} {\partial \delta \theta}= \frac {\partial (q\otimes \delta q)} {\partial \delta q}  \frac { \partial \delta q} {\partial \delta \theta} = \frac {\partial ([q]_l \delta q)} {\partial \delta q} \frac {\partial \begin{bmatrix} 1\\
-\delta \theta /2 
-\end{bmatrix}} {\partial \delta \theta} = \frac 1 2 [q]_L \begin{bmatrix} 0\\
-I\end{bmatrix}\]
-
-<p>即,</p>
-
-\[Q_{\delta \theta}=\frac 1 2 \begin{bmatrix} -q_x&amp;-q_y&amp;-q_z\\
-q_w&amp;-q_z&amp;q_y\\
-q_z&amp; q_w&amp;-q_x\\
--q_y&amp;q_x&amp;q_w\end{bmatrix}\]
+<p>实际应用时则多用查表法，效率更高。</p>
 
 <h4 id="参考文献">参考文献</h4>
 
-<p>[1] Solà, Joan. Quaternion kinematics for the error-state Kalman filter[J]. 2017.</p>
+<p>[1] Thrun, Sebastian. Probabilistic robotics[J]. Communications of the Acm, 2005, 45(3):52-57.</p>
+
+<p>[2] Hess W , Kohler D , Rapp H , et al. Real-time loop closure in 2D LIDAR SLAM[C] 2016 IEEE International Conference on Robotics and Automation (ICRA). IEEE, 2016.</p>
 
         </article>
         <hr>
@@ -378,12 +243,17 @@ q_z&amp; q_w&amp;-q_x\\
             
                 
                     
-                
-            
-        
-            
-            
-                
+                        
+                        <h2 id="similar_posts">Similar Posts</h2>
+                        <ul>
+                        
+                        <li class="relatedPost">
+                            <a href="/2023/03/24/%E4%B8%89%E8%A7%92%E6%B5%8B%E9%87%8F/">三角测量
+                            
+                            </a>
+                        </li>
+                        
+                        
                     
                 
             
@@ -406,19 +276,37 @@ q_z&amp; q_w&amp;-q_x\\
             
                 
                     
+                        
+                        <li class="relatedPost">
+                            <a href="/2023/03/24/orb-slam3/">orb-slam3论文阅读
+                            
+                            </a>
+                        </li>
+                        
+                        
+                    
                 
             
         
+            
+            
+                
+                    
+                
+            
+        
+        
+            </ul>
         
 
         <div class="post-recent">
     <div class="pre">
         
+        <p><strong>上一篇</strong> <a href="/2023/03/24/%E4%B8%89%E8%A7%92%E6%B5%8B%E9%87%8F/">三角测量</a></p>
+        
     </div>
     <div class="nex">
 
-        
-        <p><strong>下一篇</strong> <a href="/2023/03/24/orb-slam3/">orb-slam3论文阅读</a></p>
         
     </div>
 </div>
@@ -436,8 +324,8 @@ q_z&amp; q_w&amp;-q_x\\
      */
 
     var disqus_config = function() {
-        this.page.url = 'http://localhost:4000/2023/03/24/ESKF%E6%80%BB%E7%BB%93/'; // Replace PAGE_URL with your page's canonical URL variable
-        this.page.identifier = 'http://localhost:4000/2023/03/24/ESKF%E6%80%BB%E7%BB%93/'; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+        this.page.url = 'http://localhost:4000/2023/03/24/%E6%A0%85%E6%A0%BC%E5%9C%B0%E5%9B%BE%E6%9B%B4%E6%96%B0%E5%8E%9F%E7%90%86/'; // Replace PAGE_URL with your page's canonical URL variable
+        this.page.identifier = 'http://localhost:4000/2023/03/24/%E6%A0%85%E6%A0%BC%E5%9C%B0%E5%9B%BE%E6%9B%B4%E6%96%B0%E5%8E%9F%E7%90%86/'; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
     };
 
     (function() { // DON'T EDIT BELOW THIS LINE
@@ -466,6 +354,8 @@ q_z&amp; q_w&amp;-q_x\\
                     Content
                 </div>
                 <ul id="content-side" class="content-ul">
+                    
+                    <li><a href="#similar_posts">Similar Posts</a></li>
                     
                     <li><a href="#comments">Comments</a></li>
                 </ul>
