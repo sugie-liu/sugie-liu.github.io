@@ -5,9 +5,41 @@
     <description></description>
     <link>http://localhost:4000/</link>
     <atom:link href="http://localhost:4000/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Sun, 26 Mar 2023 20:40:16 +0800</pubDate>
-    <lastBuildDate>Sun, 26 Mar 2023 20:40:16 +0800</lastBuildDate>
+    <pubDate>Sun, 26 Mar 2023 22:51:06 +0800</pubDate>
+    <lastBuildDate>Sun, 26 Mar 2023 22:51:06 +0800</lastBuildDate>
     <generator>Jekyll v4.3.2</generator>
+    
+      <item>
+        <title>重读MSCKF</title>
+        <description>
+文本主要介绍了msckf源代码中关键模块中的数学关系及其背后的数学原理
+</description>
+        <pubDate>Fri, 24 Mar 2023 00:00:00 +0800</pubDate>
+        <link>http://localhost:4000/2023/03/24/%E9%87%8D%E8%AF%BBMSCKF/</link>
+        <guid isPermaLink="true">http://localhost:4000/2023/03/24/%E9%87%8D%E8%AF%BBMSCKF/</guid>
+        
+        <category>数学公式</category>
+        
+        
+        <category>SLAM</category>
+        
+      </item>
+    
+      <item>
+        <title>里程计运动模型</title>
+        <description>
+本文介绍了差速轮式机器人在运动过程中，使用编码器进行DR推算时的噪声模型，并给出了基于python的仿真模型
+</description>
+        <pubDate>Fri, 24 Mar 2023 00:00:00 +0800</pubDate>
+        <link>http://localhost:4000/2023/03/24/%E9%87%8C%E7%A8%8B%E8%AE%A1%E6%A8%A1%E5%9E%8B,/</link>
+        <guid isPermaLink="true">http://localhost:4000/2023/03/24/%E9%87%8C%E7%A8%8B%E8%AE%A1%E6%A8%A1%E5%9E%8B,/</guid>
+        
+        <category>代码仿真</category>
+        
+        
+        <category>SLAM</category>
+        
+      </item>
     
       <item>
         <title>栅格地图更新原理</title>
@@ -115,6 +147,22 @@
         <pubDate>Fri, 24 Mar 2023 00:00:00 +0800</pubDate>
         <link>http://localhost:4000/2023/03/24/ESKF%E6%80%BB%E7%BB%93/</link>
         <guid isPermaLink="true">http://localhost:4000/2023/03/24/ESKF%E6%80%BB%E7%BB%93/</guid>
+        
+        <category>数学公式</category>
+        
+        
+        <category>SLAM</category>
+        
+      </item>
+    
+      <item>
+        <title>状态估计</title>
+        <description>
+状态估计是SLAM算法中必不可少一部分，本文介绍了线性以及非线性系统状态估计的一些常用方法。
+</description>
+        <pubDate>Thu, 23 Mar 2023 00:00:00 +0800</pubDate>
+        <link>http://localhost:4000/2023/03/23/%E7%8A%B6%E6%80%81%E4%BC%B0%E8%AE%A1/</link>
+        <guid isPermaLink="true">http://localhost:4000/2023/03/23/%E7%8A%B6%E6%80%81%E4%BC%B0%E8%AE%A1/</guid>
         
         <category>数学公式</category>
         
