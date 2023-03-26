@@ -6,15 +6,15 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title>SLAM数学基础</title>
-    <meta name="description" content="在SLAM以及很多机器人技术中，位姿估计是重要的一部分内容，通常机器人的位姿通过三维的旋转矩阵或齐次变换矩阵表达，然后位姿优化的过程中会引入额外的约束，使优化变得困难。李群李代数的引入可以降低优化难度，本文旨在总结李群李代数的一些常用性质。">
+    <title>slam数学基础—姿态变换</title>
+    <meta name="description" content="本质主要介绍了两种姿态的变换关系，分别是欧拉角与旋转矩阵，四元数与旋转矩阵">
 
     <link rel="shortcut icon" href="/favicon.ico?" type="image/x-icon">
     <link rel="icon" href="/favicon.ico?" type="image/x-icon">
     <link rel="stylesheet" href="https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="https://at.alicdn.com/t/font_8v3czwksspqlg14i.css">
     <link rel="stylesheet" href="/css/main.css ">
-    <link rel="canonical" href="http://localhost:4000/2023/03/24/slam%E6%95%B0%E5%AD%A6%E5%9F%BA%E7%A1%80/">
+    <link rel="canonical" href="http://localhost:4000/2023/03/24/slam%E6%95%B0%E5%AD%A6%E5%9F%BA%E7%A1%80-%E5%A7%BF%E6%80%81%E5%8F%98%E6%8D%A2/">
     <link rel="alternate" type="application/rss+xml" title="元宝的杂货铺" href="http://localhost:4000/feed.xml ">
 
 
@@ -141,7 +141,7 @@
 
         <div class="page clearfix" post>
     <div class="left">
-        <h1>SLAM数学基础</h1>
+        <h1>slam数学基础—姿态变换</h1>
         <div class="label">
 
             <div class="label-card">
@@ -196,71 +196,45 @@
         <hr>
         <article itemscope itemtype="http://schema.org/BlogPosting">
         <ul id="markdown-toc">
-  <li><a href="#李代数的引入" id="markdown-toc-李代数的引入">李代数的引入</a></li>
-  <li><a href="#指数映射" id="markdown-toc-指数映射">指数映射</a></li>
-  <li><a href="#李代数求导" id="markdown-toc-李代数求导">李代数求导</a></li>
-  <li><a href="#伴随性质" id="markdown-toc-伴随性质">伴随性质</a></li>
-  <li><a href="#参考文献" id="markdown-toc-参考文献">参考文献</a></li>
+  <li><a href="#欧拉角与旋转矩阵" id="markdown-toc-欧拉角与旋转矩阵">欧拉角与旋转矩阵</a></li>
+  <li><a href="#四元数与旋转矩阵" id="markdown-toc-四元数与旋转矩阵">四元数与旋转矩阵</a></li>
 </ul>
 
-<p>在SLAM以及很多机器人技术中，位姿估计是重要的一部分内容，通常机器人的位姿通过三维的旋转矩阵或齐次变换矩阵表达，然后位姿优化的过程中会引入额外的约束，使优化变得困难。李群李代数的引入可以降低优化难度，本文旨在总结李群李代数的一些常用性质。</p>
+<p>本质主要介绍了两种姿态的变换关系，分别是欧拉角与旋转矩阵，四元数与旋转矩阵</p>
 
-<h2 id="李代数的引入">李代数的引入</h2>
+<h2 id="欧拉角与旋转矩阵">欧拉角与旋转矩阵</h2>
 
-<p>旋转矩阵和欧式变换矩阵是一种特殊的李群，分别记为$\small SO(3)$,$\small SE(3)$，由旋转矩阵性质可知$ \small RR^T=I$,两边求导可得$\small \dot{R}R^T+R{\dot{R^T}}=0$，即</p>
+\[R({\theta}_x,{\theta}_y,{\theta}_z)=R_z({\theta}_z)R_y({\theta}_y)R_x({\theta}_x)=\begin{bmatrix}cos({\theta}_z) &amp; -sin({\theta}_z) &amp; 0 \\
+sin({\theta}_z) &amp; cos({\theta}_z) &amp; 0 \\
+0 &amp; 0 &amp; 1 
+\end{bmatrix} 
 
-<p>$\small \dot{R}R^T=-{ \dot{R}R^T }^T$,</p>
+\begin{bmatrix} cos({\theta}_y)&amp; 0 &amp; sin({\theta}_y)\\
+ 0 &amp;1 &amp; 0 &amp; \\
+ -sin({\theta}_y) 
+ &amp; 0 &amp; cos({\theta}_y)
+ \end{bmatrix}
 
-<p>由此可见  $\small \dot{R}R^T $为反对称矩阵，</p>
+\begin{bmatrix} 1 &amp; 0 &amp; 0\\
+0 &amp; cos({\theta}_x) &amp; -sin({\theta}_x)\\
+0 &amp; sin({\theta}_x) &amp; cos({\theta}_x)
+\end{bmatrix}
+=
+\begin{bmatrix}c_zc_y &amp; c_zs_ys_x-s_zc_x &amp; c_zs_yc_x+s_zs_x\\
+s_zc_y &amp; s_zs_ys_x+c_zc_x &amp; s_zs_yc_x-c_zs_x\\
+-s_y &amp; c_ys_x &amp; c_yc_x
+\end{bmatrix}\]
 
-<p>即,</p>
+<h2 id="四元数与旋转矩阵">四元数与旋转矩阵</h2>
 
-\[\small \dot{R}R^T=  {\phi(t)}^{ \wedge} = 
-\begin{bmatrix} 0 &amp; -{\phi}_3&amp; {\phi_2}  \\ 
-{\phi}_3 &amp; 0 &amp; -{\phi}_1 \\
--{\phi}_2&amp;{\phi}_1&amp;0  \end{bmatrix}\]
+<p>设四元数为$q=q_w+q_x\mathbf{i}+q_y\mathbf{j}+q_z\mathbf{k}$</p>
 
-<p>$\small {\phi}(t) $ 即为李代数，也是常说的轴角。</p>
+<p>旋转矩阵 $\small R $ 与 四元数 $ q $ 的关系可以表示为：</p>
 
-<h2 id="指数映射">指数映射</h2>
-
-<p>由上一节可知 $\small \dot{R}={\phi(t)}^{\wedge}R $ 解微分方程可得
-\(R=  exp({\phi(t)}^{\wedge})\)</p>
-
-<p>这种指数映射关系可以写成</p>
-
-\[\begin{aligned} exp({\phi(t)}^{\wedge}) &amp;= exp({\theta} \textbf{a}^{\wedge}) = \sum_{n=0}^{ \infty } \frac1  {n!}  ({\theta} \textbf{a}^{\wedge}) ^n \\
-&amp;=cos(\theta)  \textbf{I} +(1- cos(\theta) ) \textbf{a}  \textbf{a} ^T+sin(\theta)  \textbf{a} ^{\wedge} \end{aligned}\]
-
-<p>存在另一种表达关系为</p>
-
-\[R= \textbf{I}  + (1- cos(\theta) )  (\textbf{a}^{\wedge})  ^2 )+  sin(\theta)  \textbf{a} ^{\wedge}\]
-
-<h2 id="李代数求导">李代数求导</h2>
-
-<p>设某一空间$\small p{\in}R^3$,小扰动$ \small \Delta R$对应的李代数为 $\small \psi$  利用左扰动模型，定义导数为</p>
-
-\[\begin{aligned} \frac {\partial (Rp) } {\partial \psi} &amp;= \lim_{\psi \to 0} \frac {exp(\psi)exp(\phi)p- exp(\phi)p} {\psi} \\
-&amp;{\approx} \lim_{\psi \to 0} \frac {(I+{\psi}^{\wedge})exp(\phi)p - exp(\phi)p} \psi\\
-&amp;=\lim_{\psi \to 0} \frac {\psi ^ \wedge Rp}{\psi} \\
-&amp;=\lim_{\psi \to 0} \frac {-(Rp)^ \wedge \psi}{\psi} \\
-&amp;=-(Rp)^{\wedge} \end{aligned}\]
-
-<h2 id="伴随性质">伴随性质</h2>
-
-<p>设 $ \small R{\in}SO(3) $, $ \small {\phi}{\in}so(3)$</p>
-
-\[\begin{aligned} Rexp({\phi}^{\wedge})R^T&amp;=R ( \sum_{n=0}^{ \infty } \frac1  {n!}(  {\phi}^{\wedge}) ^n )R^T\\
-&amp;=\sum_{n=0}^{ \infty } \frac1  {n!} (R {\phi}^{\wedge} R^T)^n\\
-&amp;=exp( R {\phi}^{\wedge} R^T )\\
-&amp;=exp( \left[R {\phi}\right]^{\wedge}  )
-\end{aligned}\]
-
-<h2 id="参考文献">参考文献</h2>
-
-<p>[1] SLAM十四讲</p>
-
-<p>由于本人能力有限，如有错误欢迎指出</p>
+\[R=\begin{bmatrix}q_{w}^{2}+q_{x}^{2}-q_{y}^{2}-q_{x}^{2} &amp; 2(q_xq_y-q_wq_z) &amp;2(q_xq_z+q_wq_y)\\
+2(q_xq_y+q_wq_z) &amp; q_{w}^{2}-q_{x}^{2}+q_{y}^{2}-q_{z}^{2} &amp; 2(q_yq_z-q_wq_x) \\
+2(q_xq_z-q_wq_y) &amp;2(q_yq_z+q_wq_x) &amp; q_{w}^{2}-q_{x}^{2}-q_{y}^{2}+q_{z}^{2}
+\end{bmatrix}\]
 
         </article>
         <hr>
@@ -276,7 +250,7 @@
                         <ul>
                         
                         <li class="relatedPost">
-                            <a href="/2023/03/24/slam%E6%95%B0%E5%AD%A6%E5%9F%BA%E7%A1%80-%E5%A7%BF%E6%80%81%E5%8F%98%E6%8D%A2/">slam数学基础—姿态变换
+                            <a href="/2023/03/24/slam%E6%95%B0%E5%AD%A6%E5%9F%BA%E7%A1%80/">SLAM数学基础
                             
                             </a>
                         </li>
@@ -300,11 +274,13 @@
         <div class="post-recent">
     <div class="pre">
         
-        <p><strong>上一篇</strong> <a href="/2023/03/24/slam%E6%95%B0%E5%AD%A6%E5%9F%BA%E7%A1%80-%E5%A7%BF%E6%80%81%E5%8F%98%E6%8D%A2/">slam数学基础—姿态变换</a></p>
+        <p><strong>上一篇</strong> <a href="/2023/03/24/orb-slam3/">orb-slam3论文阅读</a></p>
         
     </div>
     <div class="nex">
 
+        
+        <p><strong>下一篇</strong> <a href="/2023/03/24/slam%E6%95%B0%E5%AD%A6%E5%9F%BA%E7%A1%80/">SLAM数学基础</a></p>
         
     </div>
 </div>
@@ -322,8 +298,8 @@
      */
 
     var disqus_config = function() {
-        this.page.url = 'http://localhost:4000/2023/03/24/slam%E6%95%B0%E5%AD%A6%E5%9F%BA%E7%A1%80/'; // Replace PAGE_URL with your page's canonical URL variable
-        this.page.identifier = 'http://localhost:4000/2023/03/24/slam%E6%95%B0%E5%AD%A6%E5%9F%BA%E7%A1%80/'; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+        this.page.url = 'http://localhost:4000/2023/03/24/slam%E6%95%B0%E5%AD%A6%E5%9F%BA%E7%A1%80-%E5%A7%BF%E6%80%81%E5%8F%98%E6%8D%A2/'; // Replace PAGE_URL with your page's canonical URL variable
+        this.page.identifier = 'http://localhost:4000/2023/03/24/slam%E6%95%B0%E5%AD%A6%E5%9F%BA%E7%A1%80-%E5%A7%BF%E6%80%81%E5%8F%98%E6%8D%A2/'; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
     };
 
     (function() { // DON'T EDIT BELOW THIS LINE
