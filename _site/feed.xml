@@ -5,8 +5,8 @@
     <description></description>
     <link>http://localhost:4000/</link>
     <atom:link href="http://localhost:4000/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Sun, 26 Mar 2023 04:23:00 +0800</pubDate>
-    <lastBuildDate>Sun, 26 Mar 2023 04:23:00 +0800</lastBuildDate>
+    <pubDate>Sun, 26 Mar 2023 08:04:48 +0800</pubDate>
+    <lastBuildDate>Sun, 26 Mar 2023 08:04:48 +0800</lastBuildDate>
     <generator>Jekyll v4.3.2</generator>
     
       <item>
@@ -14,9 +14,9 @@
         <description>
 在SLAM以及很多机器人技术中，位姿估计是重要的一部分内容，通常机器人的位姿通过三维的旋转矩阵或齐次变换矩阵表达，然后位姿优化的过程中会引入额外的约束，使优化变得困难。李群李代数的引入可以降低优化难度，本文旨在总结李群李代数的一些常用性质。
 </description>
-        <pubDate>Sun, 26 Mar 2023 00:00:00 +0800</pubDate>
-        <link>http://localhost:4000/2023/03/26/slam%E6%95%B0%E5%AD%A6%E5%9F%BA%E7%A1%80/</link>
-        <guid isPermaLink="true">http://localhost:4000/2023/03/26/slam%E6%95%B0%E5%AD%A6%E5%9F%BA%E7%A1%80/</guid>
+        <pubDate>Fri, 24 Mar 2023 00:00:00 +0800</pubDate>
+        <link>http://localhost:4000/2023/03/24/slam%E6%95%B0%E5%AD%A6%E5%9F%BA%E7%A1%80/</link>
+        <guid isPermaLink="true">http://localhost:4000/2023/03/24/slam%E6%95%B0%E5%AD%A6%E5%9F%BA%E7%A1%80/</guid>
         
         <category>公式推导</category>
         
@@ -30,9 +30,9 @@
         <description>
 本文主要介绍orb-slam3的整个系统及imu在这个系统中的使用方式
 </description>
-        <pubDate>Sun, 26 Mar 2023 00:00:00 +0800</pubDate>
-        <link>http://localhost:4000/2023/03/26/orb-slam3/</link>
-        <guid isPermaLink="true">http://localhost:4000/2023/03/26/orb-slam3/</guid>
+        <pubDate>Fri, 24 Mar 2023 00:00:00 +0800</pubDate>
+        <link>http://localhost:4000/2023/03/24/orb-slam3/</link>
+        <guid isPermaLink="true">http://localhost:4000/2023/03/24/orb-slam3/</guid>
         
         <category>论文阅读</category>
         

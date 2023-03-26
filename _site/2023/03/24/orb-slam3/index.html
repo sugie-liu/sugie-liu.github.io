@@ -6,15 +6,15 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title>SLAM数学基础</title>
-    <meta name="description" content="在SLAM以及很多机器人技术中，位姿估计是重要的一部分内容，通常机器人的位姿通过三维的旋转矩阵或齐次变换矩阵表达，然后位姿优化的过程中会引入额外的约束，使优化变得困难。李群李代数的引入可以降低优化难度，本文旨在总结李群李代数的一些常用性质。">
+    <title>orb-slam3论文阅读</title>
+    <meta name="description" content="本文主要介绍orb-slam3的整个系统及imu在这个系统中的使用方式">
 
     <link rel="shortcut icon" href="/favicon.ico?" type="image/x-icon">
     <link rel="icon" href="/favicon.ico?" type="image/x-icon">
     <link rel="stylesheet" href="https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="https://at.alicdn.com/t/font_8v3czwksspqlg14i.css">
     <link rel="stylesheet" href="/css/main.css ">
-    <link rel="canonical" href="http://localhost:4000/2023/03/26/slam%E6%95%B0%E5%AD%A6%E5%9F%BA%E7%A1%80/">
+    <link rel="canonical" href="http://localhost:4000/2023/03/24/orb-slam3/">
     <link rel="alternate" type="application/rss+xml" title="元宝的杂货铺" href="http://localhost:4000/feed.xml ">
 
 
@@ -141,11 +141,11 @@
 
         <div class="page clearfix" post>
     <div class="left">
-        <h1>SLAM数学基础</h1>
+        <h1>orb-slam3论文阅读</h1>
         <div class="label">
 
             <div class="label-card">
-                <i class="fa fa-calendar"></i>2023-03-26
+                <i class="fa fa-calendar"></i>2023-03-24
             </div>
 
             <div class="label-card">
@@ -183,8 +183,8 @@
   <i class="fa fa-tags"></i>
   
     
-        <!--a href="/tag/#%E5%85%AC%E5%BC%8F%E6%8E%A8%E5%AF%BC" title="Tag: 公式推导" rel="tag">公式推导</a-->
-        <a href="/tag/#公式推导" title="Tag: 公式推导" rel="tag">公式推导</a>
+        <!--a href="/tag/#%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB" title="Tag: 论文阅读" rel="tag">论文阅读</a-->
+        <a href="/tag/#论文阅读" title="Tag: 论文阅读" rel="tag">论文阅读</a>
     
   
 
@@ -196,71 +196,110 @@
         <hr>
         <article itemscope itemtype="http://schema.org/BlogPosting">
         <ul id="markdown-toc">
-  <li><a href="#李代数的引入" id="markdown-toc-李代数的引入">李代数的引入</a></li>
-  <li><a href="#指数映射" id="markdown-toc-指数映射">指数映射</a></li>
-  <li><a href="#李代数求导" id="markdown-toc-李代数求导">李代数求导</a></li>
-  <li><a href="#伴随性质" id="markdown-toc-伴随性质">伴随性质</a></li>
-  <li><a href="#参考文献" id="markdown-toc-参考文献">参考文献</a></li>
+  <li><a href="#主要创新点" id="markdown-toc-主要创新点">主要创新点</a></li>
+  <li><a href="#系统组成" id="markdown-toc-系统组成">系统组成</a></li>
+  <li><a href="#vi-slam" id="markdown-toc-vi-slam">VI-SLAM</a>    <ul>
+      <li><a href="#a残差定义" id="markdown-toc-a残差定义">A.残差定义</a></li>
+      <li><a href="#bimu初始化" id="markdown-toc-bimu初始化">B.imu初始化</a></li>
+      <li><a href="#c跟踪和建图" id="markdown-toc-c跟踪和建图">C.跟踪和建图</a></li>
+      <li><a href="#drobustness-to-tracking-loss" id="markdown-toc-drobustness-to-tracking-loss">D.Robustness to tracking loss</a></li>
+    </ul>
+  </li>
+  <li><a href="#地图合并和回环" id="markdown-toc-地图合并和回环">地图合并和回环</a></li>
+  <li><a href="#总结" id="markdown-toc-总结">总结</a></li>
 </ul>
 
-<p>在SLAM以及很多机器人技术中，位姿估计是重要的一部分内容，通常机器人的位姿通过三维的旋转矩阵或齐次变换矩阵表达，然后位姿优化的过程中会引入额外的约束，使优化变得困难。李群李代数的引入可以降低优化难度，本文旨在总结李群李代数的一些常用性质。</p>
+<p>本文主要介绍orb-slam3的整个系统及imu在这个系统中的使用方式</p>
 
-<h2 id="李代数的引入">李代数的引入</h2>
+<p><a href="https:\\arxiv.org\abs\2007.11898v1">ORB-SLAM3: An Accurate Open-Source Library for Visual, Visual-Inertial and Multi-Map SLAM</a></p>
 
-<p>旋转矩阵和欧式变换矩阵是一种特殊的李群，分别记为$\small SO(3)$,$\small SE(3)$，由旋转矩阵性质可知$ \small RR^T=I$,两边求导可得$\small \dot{R}R^T+R{\dot{R^T}}=0$，即</p>
+<h2 id="主要创新点">主要创新点</h2>
 
-<p>$\small \dot{R}R^T=-{ \dot{R}R^T }^T$,</p>
+<p>1.整个系统（包括在imu初始化阶段）采用最大后验概率方法估计相机位姿，相比之前方法鲁棒性和精度都有所提高</p>
 
-<p>由此可见  $\small \dot{R}R^T $为反对称矩阵，</p>
+<p>2.修改图像召回算法，对于候选帧先进行几何一致性检验，然后再校验局部一致性，尽管计算耗时会略微增加，但提高了图像召回率。</p>
 
-<p>即,</p>
+<p>3.增加多地图管理系统（Atlas），特征点跟丢后会创建新的小地图，回环成功后进行地图合并操作.</p>
 
-\[\small \dot{R}R^T=  {\phi(t)}^{ \wedge} = 
-\begin{bmatrix} 0 &amp; -{\phi}_3&amp; {\phi_2}  \\ 
-{\phi}_3 &amp; 0 &amp; -{\phi}_1 \\
--{\phi}_2&amp;{\phi}_1&amp;0  \end{bmatrix}\]
+<p>4.增加鱼眼相机模型，并且容易添加其他相机模型</p>
 
-<p>$\small {\phi}(t) $ 即为李代数，也是常说的轴角。</p>
+<p>当然，这篇论文最重要的贡献在于提供了目前为止完整性和精度都比较出色的SLAM系统，最最重要的是代码开源了！！！！</p>
 
-<h2 id="指数映射">指数映射</h2>
+<h2 id="系统组成">系统组成</h2>
 
-<p>由上一节可知 $\small \dot{R}={\phi(t)}^{\wedge}R $ 解微分方程可得
-\(R=  exp({\phi(t)}^{\wedge})\)</p>
+<p><img src="/upload/2023-03-26/20200725204716634.png" alt="系统框图" /></p>
 
-<p>这种指数映射关系可以写成</p>
+<center><p>ORB_SLAM3系统框图</p></center>
 
-\[\begin{aligned} exp({\phi(t)}^{\wedge}) &amp;= exp({\theta} \textbf{a}^{\wedge}) = \sum_{n=0}^{ \infty } \frac1  {n!}  ({\theta} \textbf{a}^{\wedge}) ^n \\
-&amp;=cos(\theta)  \textbf{I} +(1- cos(\theta) ) \textbf{a}  \textbf{a} ^T+sin(\theta)  \textbf{a} ^{\wedge} \end{aligned}\]
+<p>ORB_SLAM3主要由四部分组成，地图集（Atlas）、跟踪线程、局部建图线程、回环检测和地图合并线程</p>
 
-<p>存在另一种表达关系为</p>
+<h2 id="vi-slam">VI-SLAM</h2>
 
-\[R= \textbf{I}  + (1- cos(\theta) )  (\textbf{a}^{\wedge})  ^2 )+  sin(\theta)  \textbf{a} ^{\wedge}\]
+<h3 id="a残差定义">A.残差定义</h3>
 
-<h2 id="李代数求导">李代数求导</h2>
+<p>状态量定义为</p>
 
-<p>设某一空间$\small p{\in}R^3$,小扰动$ \small \Delta R$对应的李代数为 $\small \psi$  利用左扰动模型，定义导数为</p>
+\[S_i =\begin{bmatrix} \mathbf {T}_i \\
+\mathbf {v}_i\\
+\mathbf{b}_i^g \\
+\mathbf{b}_i^a 
+\end{bmatrix}\]
 
-\[\begin{aligned} \frac {\partial (Rp) } {\partial \psi} &amp;= \lim_{\psi \to 0} \frac {exp(\psi)exp(\phi)p- exp(\phi)p} {\psi} \\
-&amp;{\approx} \lim_{\psi \to 0} \frac {(I+{\psi}^{\wedge})exp(\phi)p - exp(\phi)p} \psi\\
-&amp;=\lim_{\psi \to 0} \frac {\psi ^ \wedge Rp}{\psi} \\
-&amp;=\lim_{\psi \to 0} \frac {-(Rp)^ \wedge \psi}{\psi} \\
-&amp;=-(Rp)^{\wedge} \end{aligned}\]
+<p>与VINS类似，通过imu预积分算法计算出视觉i和i+1帧对应的
+\(\begin{bmatrix} {\Delta \mathbf{R}_{i,i+1}} &amp; {\Delta{\mathbf{v}_{i.i+1}}} &amp;  \Delta \mathbf{p}_{i,i+1} \end{bmatrix}\)</p>
 
-<h2 id="伴随性质">伴随性质</h2>
+<p>以此作为观测，定义惯性残差为</p>
 
-<p>设 $ \small R{\in}SO(3) $, $ \small {\phi}{\in}so(3)$</p>
+\[\begin{aligned}\mathbf{r}_{\Delta \mathbf{R}_{i,i+1}} &amp;= Log ( \Delta \mathbf{R}_{i,i+1}^T \mathbf{R}_i^T \mathbf{R}_{i+1}) \\
 
-\[\begin{aligned} Rexp({\phi}^{\wedge})R^T&amp;=R ( \sum_{n=0}^{ \infty } \frac1  {n!}(  {\phi}^{\wedge}) ^n )R^T\\
-&amp;=\sum_{n=0}^{ \infty } \frac1  {n!} (R {\phi}^{\wedge} R^T)^n\\
-&amp;=exp( R {\phi}^{\wedge} R^T )\\
-&amp;=exp( \left[R {\phi}\right]^{\wedge}  )
+\mathbf{r}_{\Delta \mathbf{v}_{i,i+1}} &amp;= \mathbf{R}_i^T(\mathbf{v}_{i,i+1}-\mathbf{v}_i-\mathbf{g} \Delta t_{i,i+1})-\Delta\mathbf{v}_{i,i+1}\\
+
+\mathbf{r}_{\Delta\mathbf{p}_{i,i+1}}&amp;=\mathbf{R}_i^T(\mathbf{p}_j-\mathbf{p}_i-\mathbf{v}_i\Delta t-\frac 1 2 \mathbf{g}\Delta t^2)-\Delta \mathbf{p}_{i,i+1} 
 \end{aligned}\]
 
-<h2 id="参考文献">参考文献</h2>
+<p>视觉作为观测。定义重投影误差为</p>
 
-<p>[1] SLAM十四讲</p>
+\[\small \mathbf{r}_{ij}=\mathbf{u}_{ij}-\mathbf{\pi}(\mathbf{T_{CB} \mathbf{T}_i^{-1}\oplus\mathbf{x}_j})\]
 
-<p>由于本人能力有限，如有错误欢迎指出</p>
+<h3 id="bimu初始化">B.imu初始化</h3>
+
+<p><img src="/upload/2023-03-26/20200727102454054.png" alt="imu" /></p>
+
+<center><p>imu初始化</p></center>
+
+<p>imu初始化分为三个阶段：</p>
+
+<p>Vision-only MAP Estimator, 纯视觉SLAM，耗时2秒，关键帧插入频率为4Hz，这一阶段主要估计出关键帧的位置和姿态</p>
+
+<p>Inertial-only MAP Estimator,上一阶段计算出的位姿结合帧间的惯性测量，估计出视觉SLAM阶段的尺度，重力的方向，加计和陀螺的零偏以及速度。定义的代价函数为</p>
+
+\[\small y_k^*= arg\min \left( \lVert \mathbf{r}_p \rVert_{\sum_p}^2+\sum_{i=1}^k \lVert \mathbf{r}_{\mathbf{I}_{i-1,i}}\rVert_{\sum_{\mathbf{I}_{i-1,i}}}^2 \right)\]
+
+<p>式中,$\mathbf{r}_p$为先验残差。</p>
+
+<p>Visual-Inertial MAP Estimation,这一阶段主要是对上述两个阶段优化出的参数进行refine。目的是得到精度更高的结果。</p>
+
+<h3 id="c跟踪和建图">C.跟踪和建图</h3>
+
+<p>1、优化最新两帧的状态，地图点保持固定；</p>
+
+<p>2、优化滑窗里的关键帧和特征点，共视帧作为观测也加入到优化中，但共视帧的特征点和状态保持固定；</p>
+
+<p>3、当初始化阶段imu的激励不够时，只优化尺度和重力方向，然后估计每帧imu的bias，这个trick使得计算快而有效。</p>
+
+<h3 id="drobustness-to-tracking-loss">D.Robustness to tracking loss</h3>
+
+<p>1、短时丢失，通过imu计算当前帧的状态，使用更大的滑窗进行优化</p>
+
+<p>2、长时丢失，建立新的地图，并把它设为激活状态</p>
+
+<h2 id="地图合并和回环">地图合并和回环</h2>
+
+<p>如果召回的关键帧在当前激活的地图中发生则进行回环优化的操作，如果在其他地图中，则激活该地图并进行merge操作。当估计出新的关键帧和地图的相对pose后，召回的关键帧及其共视帧形成一个局部窗口进一步进行优化，得到更精确的结果</p>
+
+<h2 id="总结">总结</h2>
+
+<p>地图合并操作比较复杂，这里不再进行赘述，后续代码阅读会这部分进行详细总结，以上内容纯属个人理解，如有错误欢迎指出.</p>
 
         </article>
         <hr>
@@ -279,11 +318,11 @@
         <div class="post-recent">
     <div class="pre">
         
-        <p><strong>上一篇</strong> <a href="/2023/03/26/orb-slam3/">orb-slam3论文阅读</a></p>
-        
     </div>
     <div class="nex">
 
+        
+        <p><strong>下一篇</strong> <a href="/2023/03/24/slam%E6%95%B0%E5%AD%A6%E5%9F%BA%E7%A1%80/">SLAM数学基础</a></p>
         
     </div>
 </div>
@@ -301,8 +340,8 @@
      */
 
     var disqus_config = function() {
-        this.page.url = 'http://localhost:4000/2023/03/26/slam%E6%95%B0%E5%AD%A6%E5%9F%BA%E7%A1%80/'; // Replace PAGE_URL with your page's canonical URL variable
-        this.page.identifier = 'http://localhost:4000/2023/03/26/slam%E6%95%B0%E5%AD%A6%E5%9F%BA%E7%A1%80/'; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+        this.page.url = 'http://localhost:4000/2023/03/24/orb-slam3/'; // Replace PAGE_URL with your page's canonical URL variable
+        this.page.identifier = 'http://localhost:4000/2023/03/24/orb-slam3/'; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
     };
 
     (function() { // DON'T EDIT BELOW THIS LINE
