@@ -5,9 +5,25 @@
     <description></description>
     <link>http://localhost:4000/</link>
     <atom:link href="http://localhost:4000/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Sun, 26 Mar 2023 09:40:54 +0800</pubDate>
-    <lastBuildDate>Sun, 26 Mar 2023 09:40:54 +0800</lastBuildDate>
+    <pubDate>Sun, 26 Mar 2023 10:35:34 +0800</pubDate>
+    <lastBuildDate>Sun, 26 Mar 2023 10:35:34 +0800</lastBuildDate>
     <generator>Jekyll v4.3.2</generator>
+    
+      <item>
+        <title>三角测量</title>
+        <description>
+三角测量是三维重建(SFM)和SLAM中是比较重要的一部分,本文总结一些三角化一些常用方法.
+</description>
+        <pubDate>Fri, 24 Mar 2023 00:00:00 +0800</pubDate>
+        <link>http://localhost:4000/2023/03/24/%E4%B8%89%E8%A7%92%E6%B5%8B%E9%87%8F/</link>
+        <guid isPermaLink="true">http://localhost:4000/2023/03/24/%E4%B8%89%E8%A7%92%E6%B5%8B%E9%87%8F/</guid>
+        
+        <category>论文阅读</category>
+        
+        
+        <category>SLAM</category>
+        
+      </item>
     
       <item>
         <title>SLAM数学基础</title>

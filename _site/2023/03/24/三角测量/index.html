@@ -6,15 +6,15 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title>orb-slam3论文阅读</title>
-    <meta name="description" content="本文主要介绍orb-slam3的整个系统及imu在这个系统中的使用方式">
+    <title>三角测量</title>
+    <meta name="description" content="三角测量是三维重建(SFM)和SLAM中是比较重要的一部分,本文总结一些三角化一些常用方法.">
 
     <link rel="shortcut icon" href="/favicon.ico?" type="image/x-icon">
     <link rel="icon" href="/favicon.ico?" type="image/x-icon">
     <link rel="stylesheet" href="https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="https://at.alicdn.com/t/font_8v3czwksspqlg14i.css">
     <link rel="stylesheet" href="/css/main.css ">
-    <link rel="canonical" href="http://localhost:4000/2023/03/24/orb-slam3/">
+    <link rel="canonical" href="http://localhost:4000/2023/03/24/%E4%B8%89%E8%A7%92%E6%B5%8B%E9%87%8F/">
     <link rel="alternate" type="application/rss+xml" title="元宝的杂货铺" href="http://localhost:4000/feed.xml ">
 
 
@@ -141,7 +141,7 @@
 
         <div class="page clearfix" post>
     <div class="left">
-        <h1>orb-slam3论文阅读</h1>
+        <h1>三角测量</h1>
         <div class="label">
 
             <div class="label-card">
@@ -196,110 +196,110 @@
         <hr>
         <article itemscope itemtype="http://schema.org/BlogPosting">
         <ul id="markdown-toc">
-  <li><a href="#主要创新点" id="markdown-toc-主要创新点">主要创新点</a></li>
-  <li><a href="#系统组成" id="markdown-toc-系统组成">系统组成</a></li>
-  <li><a href="#vi-slam" id="markdown-toc-vi-slam">VI-SLAM</a>    <ul>
-      <li><a href="#a残差定义" id="markdown-toc-a残差定义">A.残差定义</a></li>
-      <li><a href="#bimu初始化" id="markdown-toc-bimu初始化">B.imu初始化</a></li>
-      <li><a href="#c跟踪和建图" id="markdown-toc-c跟踪和建图">C.跟踪和建图</a></li>
-      <li><a href="#drobustness-to-tracking-loss" id="markdown-toc-drobustness-to-tracking-loss">D.Robustness to tracking loss</a></li>
+  <li><a href="#1vins和orb三角化" id="markdown-toc-1vins和orb三角化">1.VINS和ORB三角化</a>    <ul>
+      <li><a href="#参考文献" id="markdown-toc-参考文献">参考文献</a></li>
     </ul>
   </li>
-  <li><a href="#地图合并和回环" id="markdown-toc-地图合并和回环">地图合并和回环</a></li>
-  <li><a href="#总结" id="markdown-toc-总结">总结</a></li>
 </ul>
 
-<p>本文主要介绍orb-slam3的整个系统及imu在这个系统中的使用方式</p>
+<p>三角测量是三维重建(SFM)和SLAM中是比较重要的一部分,本文总结一些三角化一些常用方法.</p>
 
-<p><a href="https:\\arxiv.org\abs\2007.11898v1">ORB-SLAM3: An Accurate Open-Source Library for Visual, Visual-Inertial and Multi-Map SLAM</a></p>
+<p><img src="/upload/2023-03-26/u3703692301872571881fm26gp0.png" alt="三角测量" /></p>
 
-<h2 id="主要创新点">主要创新点</h2>
+<h2 id="1vins和orb三角化">1.VINS和ORB三角化</h2>
 
-<p>1.整个系统（包括在imu初始化阶段）采用最大后验概率方法估计相机位姿，相比之前方法鲁棒性和精度都有所提高</p>
+<p>记三维空间点的齐次坐标为$\small P=\begin{bmatrix}x&amp;y&amp;z&amp;1 \end{bmatrix}^T$,$ \small P $在图像上的投影点为$\small x=\begin{bmatrix}u&amp;v&amp;1\end{bmatrix}^T$,投影矩阵为$\small \pi$,由投影关系可得</p>
 
-<p>2.修改图像召回算法，对于候选帧先进行几何一致性检验，然后再校验局部一致性，尽管计算耗时会略微增加，但提高了图像召回率。</p>
+\[\small \lambda x=\pi P\]
 
-<p>3.增加多地图管理系统（Atlas），特征点跟丢后会创建新的小地图，回环成功后进行地图合并操作.</p>
+<p>两边同时叉乘$\small x $得</p>
 
-<p>4.增加鱼眼相机模型，并且容易添加其他相机模型</p>
+\[\small [x]_{\times}\pi P=0\]
 
-<p>当然，这篇论文最重要的贡献在于提供了目前为止完整性和精度都比较出色的SLAM系统，最最重要的是代码开源了！！！！</p>
+<p>展开得</p>
 
-<h2 id="系统组成">系统组成</h2>
+\[\begin{bmatrix}0&amp;-1&amp;v \\
+1&amp;0&amp;-u\\
+-v&amp;u&amp;0
+\end{bmatrix}
+\begin{bmatrix}\pi_1\\
+\pi_2 \\
+\pi_3 \end{bmatrix}
+ P=0\]
 
-<p><img src="/upload/2023-03-26/20200725204716634.png" alt="系统框图" /></p>
+<p>由此可以得到三个方程,其中两个是线性独立的,只需取前两个方程,两帧一个匹配对可以形成四个方程</p>
 
-<center><p>ORB_SLAM3系统框图</p></center>
+\[AP=\begin{bmatrix}v_1 \pi_{3}^{1} - \pi_{2}^{1}\\
+ \pi_{1}^{1}-u_1\pi_{3}^{1}\\
+ v_2 \pi_{3}^{2}-\pi_{2}^{2}\\
+ \pi_{1}^{2}-u_2\\pi_{3}^{2}
+ \end{bmatrix}
+ P=0\]
 
-<p>ORB_SLAM3主要由四部分组成，地图集（Atlas）、跟踪线程、局部建图线程、回环检测和地图合并线程</p>
+<p>通过对A的SVD分解，最后得到的是A的最小奇异值对应的单位奇异矢量，若 $P = (x, y, z, w) $，深度则为z/w.</p>
 
-<h2 id="vi-slam">VI-SLAM</h2>
+<p>## 2.SVO三角化</p>
 
-<h3 id="a残差定义">A.残差定义</h3>
+<p>设第二帧相对于第一帧的旋转和平移分别为$ \small R,t $,由对极几何定义可得</p>
 
-<p>状态量定义为</p>
+\[\lambda_1 x_1=\lambda_2 R x_2+t\]
 
-\[S_i =\begin{bmatrix} \mathbf {T}_i \\
-\mathbf {v}_i\\
-\mathbf{b}_i^g \\
-\mathbf{b}_i^a 
-\end{bmatrix}\]
+<p>整理得,</p>
 
-<p>与VINS类似，通过imu预积分算法计算出视觉i和i+1帧对应的
-\(\begin{bmatrix} {\Delta \mathbf{R}_{i,i+1}} &amp; {\Delta{\mathbf{v}_{i.i+1}}} &amp;  \Delta \mathbf{p}_{i,i+1} \end{bmatrix}\)</p>
+\[\lambda_1 x_1- \lambda_2 R x_2=t\]
 
-<p>以此作为观测，定义惯性残差为</p>
+\[\begin{aligned}
+ \begin{bmatrix} \lambda_1 &amp; \lambda_2 R \end{bmatrix}
+ \begin{bmatrix} x_1\\
+ -x_2 \end{bmatrix} &amp;=t \\
+ \begin{bmatrix} \lambda_1\\
+ \lambda_2 R \end{bmatrix}
+ \begin{bmatrix} \lambda_1&amp;\lambda_2 R\end{bmatrix}
+ \begin{bmatrix} x_1\\
+ -x_2 \end{bmatrix}&amp;= \begin{bmatrix} \lambda_1\\
+ \lambda_2 R \end{bmatrix}t\\
+ A^TA \begin{bmatrix} x_1\\
+ -x_2\end{bmatrix}&amp;=A^Tt\\
+ \begin{bmatrix} x_1\\
+ -x_2\end{bmatrix}&amp;=(A^TA)^{-1}A^Tt \end{aligned}\]
 
-\[\begin{aligned}\mathbf{r}_{\Delta \mathbf{R}_{i,i+1}} &amp;= Log ( \Delta \mathbf{R}_{i,i+1}^T \mathbf{R}_i^T \mathbf{R}_{i+1}) \\
+<p>每幅图像都可以出这一点的深度值。这就像对同一个状态变量我们进行了多次测量，因此，可以用贝叶斯估计来对多个测量值进行融合，使得估计的不确定性缩小</p>
 
-\mathbf{r}_{\Delta \mathbf{v}_{i,i+1}} &amp;= \mathbf{R}_i^T(\mathbf{v}_{i,i+1}-\mathbf{v}_i-\mathbf{g} \Delta t_{i,i+1})-\Delta\mathbf{v}_{i,i+1}\\
+<p>## 3.msckf 三角化</p>
 
-\mathbf{r}_{\Delta\mathbf{p}_{i,i+1}}&amp;=\mathbf{R}_i^T(\mathbf{p}_j-\mathbf{p}_i-\mathbf{v}_i\Delta t-\frac 1 2 \mathbf{g}\Delta t^2)-\Delta \mathbf{p}_{i,i+1} 
-\end{aligned}\]
+<p>记$\small P$在第一帧和第二帧的三维坐标分别为$\small P_1,P_2$,由坐标变换可得</p>
 
-<p>视觉作为观测。定义重投影误差为</p>
+\[P_1=RP_2+t \tag{1}\]
 
-\[\small \mathbf{r}_{ij}=\mathbf{u}_{ij}-\mathbf{\pi}(\mathbf{T_{CB} \mathbf{T}_i^{-1}\oplus\mathbf{x}_j})\]
+<p>式$ \small (1) $,还可以写成</p>
 
-<h3 id="bimu初始化">B.imu初始化</h3>
+\[\begin{aligned}
+ P_1 &amp;=R \begin{bmatrix} x_2\\
+ y_2\\
+ z_2 \end{bmatrix}+t \\
+ &amp;=z_2 \left(R \begin{bmatrix} \frac {x_2} {z_2}\\
+ \frac {y_2} {z_2} \\
+ 1\end{bmatrix} + \frac 1 {z_2} t \right)\\
+ &amp;=\frac {1} {\rho} \left(R \begin{bmatrix} \alpha\\
+ \beta  \\
+ 1\end{bmatrix} +\rho t \right)\\
+ &amp;=\frac {1} {\rho}\begin{bmatrix} h_1(\alpha,\beta,\rho)\\
+ h_2(\alpha,\beta,\rho)  \\
+ h_3(\alpha,\beta,\rho)\end{bmatrix}
+ \end{aligned}\]
 
-<p><img src="/upload/2023-03-26/20200727102454054.png" alt="imu" /></p>
+<p>其中$ \alpha= \frac {x_2} {z_2},\beta=\frac {y_2} {z_2} ,\rho=\frac 1 {z_2} $构建观测方程为</p>
 
-<center><p>imu初始化</p></center>
+\[z=\frac 1 {h_3(\alpha,\beta,\rho)} \begin{bmatrix} h_1(\alpha,\beta,\rho)\\
+ h_2(\alpha,\beta,\rho) \end{bmatrix}+n\]
 
-<p>imu初始化分为三个阶段：</p>
+<p>多个相机观测,构建一个最小二乘问题,求出$ \alpha,\beta,\rho$,进而恢复出深度.</p>
 
-<p>Vision-only MAP Estimator, 纯视觉SLAM，耗时2秒，关键帧插入频率为4Hz，这一阶段主要估计出关键帧的位置和姿态</p>
+<h3 id="参考文献">参考文献</h3>
 
-<p>Inertial-only MAP Estimator,上一阶段计算出的位姿结合帧间的惯性测量，估计出视觉SLAM阶段的尺度，重力的方向，加计和陀螺的零偏以及速度。定义的代价函数为</p>
+<p>[1] SLAM十四讲</p>
 
-\[\small y_k^*= arg\min \left( \lVert \mathbf{r}_p \rVert_{\sum_p}^2+\sum_{i=1}^k \lVert \mathbf{r}_{\mathbf{I}_{i-1,i}}\rVert_{\sum_{\mathbf{I}_{i-1,i}}}^2 \right)\]
-
-<p>式中,$\mathbf{r}_p$为先验残差。</p>
-
-<p>Visual-Inertial MAP Estimation,这一阶段主要是对上述两个阶段优化出的参数进行refine。目的是得到精度更高的结果。</p>
-
-<h3 id="c跟踪和建图">C.跟踪和建图</h3>
-
-<p>1、优化最新两帧的状态，地图点保持固定；</p>
-
-<p>2、优化滑窗里的关键帧和特征点，共视帧作为观测也加入到优化中，但共视帧的特征点和状态保持固定；</p>
-
-<p>3、当初始化阶段imu的激励不够时，只优化尺度和重力方向，然后估计每帧imu的bias，这个trick使得计算快而有效。</p>
-
-<h3 id="drobustness-to-tracking-loss">D.Robustness to tracking loss</h3>
-
-<p>1、短时丢失，通过imu计算当前帧的状态，使用更大的滑窗进行优化</p>
-
-<p>2、长时丢失，建立新的地图，并把它设为激活状态</p>
-
-<h2 id="地图合并和回环">地图合并和回环</h2>
-
-<p>如果召回的关键帧在当前激活的地图中发生则进行回环优化的操作，如果在其他地图中，则激活该地图并进行merge操作。当估计出新的关键帧和地图的相对pose后，召回的关键帧及其共视帧形成一个局部窗口进一步进行优化，得到更精确的结果</p>
-
-<h2 id="总结">总结</h2>
-
-<p>地图合并操作比较复杂，这里不再进行赘述，后续代码阅读会这部分进行详细总结，以上内容纯属个人理解，如有错误欢迎指出.</p>
+<p>[2]<a href="https:\\github.com\uzh-rpg\rpg_svo\issues\62">A Multi-State Constraint Kalman Filter for Vision-aided Inertial Navigation</a></p>
 
         </article>
         <hr>
@@ -310,31 +310,31 @@
             
                 
                     
+                
+            
+        
+            
+            
+                
+                    
+                
+            
+        
+            
+            
+                
+                    
                         
                         <h2 id="similar_posts">Similar Posts</h2>
                         <ul>
                         
                         <li class="relatedPost">
-                            <a href="/2023/03/24/%E4%B8%89%E8%A7%92%E6%B5%8B%E9%87%8F/">三角测量
+                            <a href="/2023/03/24/orb-slam3/">orb-slam3论文阅读
                             
                             </a>
                         </li>
                         
                         
-                    
-                
-            
-        
-            
-            
-                
-                    
-                
-            
-        
-            
-            
-                
                     
                 
             
@@ -346,11 +346,11 @@
         <div class="post-recent">
     <div class="pre">
         
+        <p><strong>上一篇</strong> <a href="/2023/03/24/slam%E6%95%B0%E5%AD%A6%E5%9F%BA%E7%A1%80/">SLAM数学基础</a></p>
+        
     </div>
     <div class="nex">
 
-        
-        <p><strong>下一篇</strong> <a href="/2023/03/24/slam%E6%95%B0%E5%AD%A6%E5%9F%BA%E7%A1%80-%E5%A7%BF%E6%80%81%E5%8F%98%E6%8D%A2/">slam数学基础—姿态变换</a></p>
         
     </div>
 </div>
@@ -368,8 +368,8 @@
      */
 
     var disqus_config = function() {
-        this.page.url = 'http://localhost:4000/2023/03/24/orb-slam3/'; // Replace PAGE_URL with your page's canonical URL variable
-        this.page.identifier = 'http://localhost:4000/2023/03/24/orb-slam3/'; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+        this.page.url = 'http://localhost:4000/2023/03/24/%E4%B8%89%E8%A7%92%E6%B5%8B%E9%87%8F/'; // Replace PAGE_URL with your page's canonical URL variable
+        this.page.identifier = 'http://localhost:4000/2023/03/24/%E4%B8%89%E8%A7%92%E6%B5%8B%E9%87%8F/'; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
     };
 
     (function() { // DON'T EDIT BELOW THIS LINE
