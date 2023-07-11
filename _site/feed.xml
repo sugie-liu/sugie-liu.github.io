@@ -5,51 +5,33 @@
     <description></description>
     <link>http://localhost:4000/</link>
     <atom:link href="http://localhost:4000/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Mon, 26 Jun 2023 14:20:37 +0800</pubDate>
-    <lastBuildDate>Mon, 26 Jun 2023 14:20:37 +0800</lastBuildDate>
+    <pubDate>Tue, 11 Jul 2023 22:42:54 +0800</pubDate>
+    <lastBuildDate>Tue, 11 Jul 2023 22:42:54 +0800</lastBuildDate>
     <generator>Jekyll v4.3.2</generator>
     
       <item>
+        <title>slam中矩阵那些事儿</title>
+        <description>
+本文主要总结的了slam中常用的矩阵运算，并给出了这些运算在slam中的一些应用
+</description>
+        <pubDate>Wed, 24 May 2023 00:00:00 +0800</pubDate>
+        <link>http://localhost:4000/2023/05/24/slam%E4%B8%AD%E7%9F%A9%E9%98%B5%E9%82%A3%E4%BA%9B%E4%BA%8B%E5%84%BF/</link>
+        <guid isPermaLink="true">http://localhost:4000/2023/05/24/slam%E4%B8%AD%E7%9F%A9%E9%98%B5%E9%82%A3%E4%BA%9B%E4%BA%8B%E5%84%BF/</guid>
+        
+        <category>数学公式</category>
+        
+        
+        <category>SLAM</category>
+        
+      </item>
+    
+      <item>
         <title>视觉矢量地图定位</title>
-        <description>&lt;ul id=&quot;markdown-toc&quot;&gt;
-  &lt;li&gt;&lt;a href=&quot;#1数据源&quot; id=&quot;markdown-toc-1数据源&quot;&gt;1、数据源：&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;#2初始化部分&quot; id=&quot;markdown-toc-2初始化部分&quot;&gt;2、初始化部分&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;#3跟踪部分&quot; id=&quot;markdown-toc-3跟踪部分&quot;&gt;3、跟踪部分&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
+        <description>
 相关论文
 1、&lt;a href=&quot;https://arxiv.org/pdf/2107.02557.pdf&quot;&gt;Coarse-to-fine Semantic Localization with HD Map for Autonomous Driving in Structural Scenes&lt;/a&gt;
 
 定位分成了三部分：数据源、初始化以及跟踪部分。
-
-&lt;h2 id=&quot;1数据源&quot;&gt;1、数据源：&lt;/h2&gt;
-
-定位系统的输入包含有图像、GPS、轮式里程计以及高精地图。
-
-为了找到HD map 元素和图像间的对应关系，本文应用了语义分割方法来提取图像中的语义信息，所提取的语义信息包括道路标记（LA）如车道线，柱状无图（PO），指示牌（SB）。
-
-通过使用语义分割信息，采用非线性优化获取车辆的位姿信息。作者对语义分割中不同的元素采用不同的后处理方法。对于LA、PO采用腐蚀膨胀操作，
-对于SB，通过Laplace transform提取边缘信息，然后通过形态学操作得到平滑可微的图像，经过形态学操作生成的代价地图使得位姿优化可以更快的收敛到正确的结果，最终经过处理的分割结果的像素值转换成0到1范围内。
-作者定义后处理的分割结果标记为 $I_s$
-
-&lt;h2 id=&quot;2初始化部分&quot;&gt;2、初始化部分&lt;/h2&gt;
-
-初始化模块用于获取在地图坐标系相对准确的位姿估计。作者引入鲁棒的精确的初始化方法，该方法是一个由粗到精的操作，粗略的初始位置由GPS给定。通过暴力搜索找到车辆在HD坐标系下的精确位置，搜索和优化的代价函数定义为各个语义标记的光度误差之和。即：
-
-\[cost = \sum_{i=0}^{n} \| I_s(\pi((T_{wb} * T_{bc})^{-1}P_w)) - 1.0\|_{2}\]
-
-式中，$P_w$为地图中元素位置，$T_{bc}$为相机外参。$\pi$为相机模型的投影方程。
-
-&lt;h2 id=&quot;3跟踪部分&quot;&gt;3、跟踪部分&lt;/h2&gt;
-
-在跟踪阶段通过语义特征和先验地图对齐可以估计出车辆的位置。跟踪模块可以分成三部分
-（1）k+1帧的位置$T_{wb}^{k+1}$,可以通过k帧$T_{wb}^{k}$以及其他传感器的测量信息$T_{b}^{k{\rightarrow}k+1}$计算得出。
-
-\[T_{wb}^{k+1} = T_{wb}^{k} * T_b^{k{\rightarrow}k+1}\]
-
-如果驾驶场景满足车辆纵向约束，则从全局地图截取局部地图，否则先进行纵向位置矫正流程。
-
-然后进行Data association，计算重投影误差，采用非线性优化计算当前帧的初始值。为了保证计算结果的平滑性，采用滑窗方法，进行pose graph optimization。
 </description>
         <pubDate>Tue, 25 Apr 2023 00:00:00 +0800</pubDate>
         <link>http://localhost:4000/2023/04/25/%E8%A7%86%E8%A7%89%E7%9F%A2%E9%87%8F%E5%AE%9A%E4%BD%8D/</link>
@@ -187,24 +169,6 @@
         
         
         <category>SLAM</category>
-        
-      </item>
-    
-      <item>
-        <title>HF-Net 论文阅读</title>
-        <description>
-最近,提出了众多通过深度学习实现图象匹配和召回的网络,这篇文章在分层定位方法中.使用这些网络提取的特征点,取得了鲁棒性和精度的平衡。作者利用全局描述子和局部特征实现了由粗到精的位姿估计过程，并且在大型环境中取得了不错的效果。为了进一步提高这个方法的的有效性，该文章提出了一种可以同时估计出局部和全局特征的卷积神经网络，最大限度的共享计算量，作者称之为分层特征网络（HF-NET）。并且展示了这种压缩模型可以使用多任务蒸馏这种灵活的方式得到训练。
-</description>
-        <pubDate>Fri, 24 Mar 2023 00:00:00 +0800</pubDate>
-        <link>http://localhost:4000/2023/03/24/HF-Net%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB/</link>
-        <guid isPermaLink="true">http://localhost:4000/2023/03/24/HF-Net%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB/</guid>
-        
-        <category>深度学习</category>
-        
-        <category>图片召回</category>
-        
-        
-        <category>DeepLearning</category>
         
       </item>
     
