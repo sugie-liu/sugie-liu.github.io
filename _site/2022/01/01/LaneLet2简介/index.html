@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>LaneLet2简介</title>
+    <meta name="description" content="高精地图在自动驾驶中通常分为四部分静态图层、定位图层、语义图层和动态图层。1、静态图层：道路的测绘信息2、定位图层：在激光slam中通常会存储点云信息，VSLAM中会存储关键帧，但 这类信息数据量都相对会比较庞大，目前也在朝着矢量地图的方向发展。3、语义图层：交通标志4、动态图层：车辆的一些实时信息、道路拥堵情况...">
+
+    <link rel="shortcut icon" href="/favicon.ico?" type="image/x-icon">
+    <link rel="icon" href="/favicon.ico?" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://at.alicdn.com/t/font_8v3czwksspqlg14i.css">
+    <link rel="stylesheet" href="/css/main.css ">
+    <link rel="canonical" href="http://localhost:4000/2022/01/01/LaneLet2%E7%AE%80%E4%BB%8B/">
+    <link rel="alternate" type="application/rss+xml" title="元宝的杂货铺" href="http://localhost:4000/feed.xml ">
+
+
+    <script>
+    // 百度统计代码
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?cf8506e0ef223e57ff6239944e5d46a4";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+    </script>
+
+
+    <script>
+    // google analytics
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-72449510-4', 'auto');
+      ga('send', 'pageview');
+
+    </script>
+
+
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+    tex2jax: { inlineMath: [["$","$"],["\\(","\\)"]] },
+    "HTML-CSS": {
+      linebreaks: { automatic: true, width: "container" }
+    }
+});
+</script>
+<script type="text/javascript"
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+</head>
+
+
+  <body>
+
+    <header id="top">
+    <div class="wrapper">
+        <a href="/" class="brand">元宝的杂货铺</a>
+        <small>机器人的学习之路</small>
+        <button id="headerMenu" class="menu"><i class="fa fa-bars"></i></button>
+        <nav id="headerNav">
+            <ul>
+                <li>
+                    
+                    <a href="/">
+                    
+                        <i class="fa fa-home"></i>Home
+                    </a>
+                </li>
+
+                
+                    
+                    <li>
+                        
+                        <a href="/archive/">
+                        
+                            <i class="fa fa-archive"></i>Archives
+                        </a>
+                    </li>
+                    
+                
+                    
+                    <li>
+                        
+                        <a href="/category/">
+                        
+                            <i class="fa fa-th-list"></i>Categories
+                        </a>
+                    </li>
+                    
+                
+                    
+                    <li>
+                        
+                        <a href="/tag/">
+                        
+                            <i class="fa fa-tags"></i>Tags
+                        </a>
+                    </li>
+                    
+                
+                    
+                    <li>
+                        
+                        <a href="/collection/">
+                        
+                            <i class="fa fa-bookmark"></i>Collections
+                        </a>
+                    </li>
+                    
+                
+                    
+                    <li>
+                        
+                        <a href="/about/">
+                        
+                            <i class="fa fa-heart"></i>About
+                        </a>
+                    </li>
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+            </ul>
+        </nav>
+    </div>
+</header>
+
+
+        <div class="page clearfix" post>
+    <div class="left">
+        <h1>LaneLet2简介</h1>
+        <div class="label">
+
+            <div class="label-card">
+                <i class="fa fa-calendar"></i>2022-01-01
+            </div>
+
+            <div class="label-card">
+                <i class="fa fa-user"></i>sugie
+                
+            </div>
+
+            <div class="label-card">
+                
+            </div>
+
+            <div class="label-card">
+            
+
+
+<!-- <span class="point">•</span> -->
+<span class="categories">
+  <i class="fa fa-th-list"></i>
+  
+    
+        <a href="/category/#自动驾驶" title="Category: 自动驾驶" rel="category">自动驾驶</a>
+    
+  
+
+  <!-- <span class="point">•</span> -->
+</span>
+
+
+            </div>
+
+            <div class="label-card">
+            
+<!-- <span class="point">•</span> -->
+<span class="pageTag">
+  <i class="fa fa-tags"></i>
+  
+    
+        <!--a href="/tag/#%E5%9C%B0%E5%9B%BE%E6%A0%BC%E5%BC%8F" title="Tag: 地图格式" rel="tag">地图格式</a-->
+        <a href="/tag/#地图格式" title="Tag: 地图格式" rel="tag">地图格式</a>
+    
+  
+
+</span>
+
+            </div>
+
+        </div>
+        <hr>
+        <article itemscope itemtype="http://schema.org/BlogPosting">
+        <ul id="markdown-toc">
+  <li><a href="#lanelet简介" id="markdown-toc-lanelet简介">LaneLet简介</a>    <ul>
+      <li><a href="#lanelet地图层" id="markdown-toc-lanelet地图层">LaneLet地图层</a></li>
+      <li><a href="#lanelet基本元素" id="markdown-toc-lanelet基本元素">LaneLet基本元素</a>        <ul>
+          <li><a href="#1points" id="markdown-toc-1points">1、Points</a></li>
+          <li><a href="#2linestrings" id="markdown-toc-2linestrings">2、Linestrings</a></li>
+          <li><a href="#3polygon" id="markdown-toc-3polygon">3、Polygon</a></li>
+          <li><a href="#4lanelets" id="markdown-toc-4lanelets">4、Lanelets</a></li>
+          <li><a href="#5areas" id="markdown-toc-5areas">5、Areas</a></li>
+          <li><a href="#6regelem-regulatory-elements-" id="markdown-toc-6regelem-regulatory-elements-">6、regElem （Regulatory elements ）</a>            <ul>
+              <li><a href="#参考文献" id="markdown-toc-参考文献">参考文献</a></li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<p>高精地图在自动驾驶中通常分为四部分静态图层、定位图层、语义图层和动态图层。</p>
+
+<p>1、静态图层：道路的测绘信息</p>
+
+<p>2、定位图层：在激光slam中通常会存储点云信息，VSLAM中会存储关键帧，但 这类信息数据量都相对会比较庞大，目前也在朝着矢量地图的方向发展。</p>
+
+<p>3、语义图层：交通标志</p>
+
+<p>4、动态图层：车辆的一些实时信息、道路拥堵情况</p>
+
+<p>关于静态图层和语义图层的处理不同的图商有不同的格式，不同的自动驾驶框架也采用了不同的格式，比如apollo采用OpenDRIVE,autoware采用LaneLet。本文主要介绍LanLet的一些情况。</p>
+
+<h1 id="lanelet简介">LaneLet简介</h1>
+
+<p>Lanelet2是Liblanelet的扩展和推广，也被称为Lanelet，为Bertha Drive Project开发。Lanelet2地图采用了基于XML(可扩展标记语言)的OSM数据格式</p>
+
+<h2 id="lanelet地图层">LaneLet地图层</h2>
+
+<p>Lanelet2地图包含三层：物理层、关系层和拓扑层。第一物理层由两个元素组成，点和线串。点是地图的基本元素。它可以表示垂直结构，如杆点作为单点、车道或区域作为一组点。线串构造为两个或多个点的有序数组，其中每两个点之间使用线性插值。</p>
+
+<p>物理层：定义了可检测的元素，如交通灯、标志、路沿石等。</p>
+
+<p>关系层：由三个要素组成：网域、区域和调控要素。Lanelets定义了不同的道路类型，如普通车道、人行横道和铁轨。Lanelets也与交通规则相关，这些规则在Lanelets内不会改变。它是由一个左和一个右的线字符串定义为两个方向相反的边界。通过将左边框更改为右边框(反之亦然)，这对线串中的方向是可互换的。区域由一条或多条线组成一个封闭的屏障，通常代表静态建筑，如建筑物、停车场、操场和草地空间。调控要素定义了对车辆进行调控的交通规则。车道和区域可以有一个或多个调控元素，如速度限制和限制。此外，还可以添加基于时间的转向限制等动态规则作为调控元素</p>
+
+<p>拓扑层：关系层间相对关系，如不同的车辆间的变道情况</p>
+
+<p><img src="/upload/2022-01-01/lanelet_layers.png" alt="layers" /></p>
+
+<h2 id="lanelet基本元素">LaneLet基本元素</h2>
+
+<p>Lanelet2 将地图分成了六个元素: Points, Linestrings, polygons, Lanelets, Areas and regulatory elements。每个元素具有唯一id。</p>
+
+<h3 id="1points">1、Points</h3>
+
+<p>points由ID，3d坐标和属性组成，是唯一存储实际位置信息的元素，ID必须是唯一的。其他基本元素都是直接或者间接由points组成的。在Lanelet2中，Points本身并不是有意义的对象，Points仅与Lanelet2中的其他对象一起使用有意义。
+point 具有如下属性</p>
+
+<div class="language-c++ highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="k">static</span> <span class="k">constexpr</span> <span class="k">const</span> <span class="kt">char</span> <span class="n">Arrow</span><span class="p">[]</span> <span class="o">=</span> <span class="s">"arrow"</span><span class="p">;</span>
+  <span class="k">static</span> <span class="k">constexpr</span> <span class="k">const</span> <span class="kt">char</span> <span class="n">Pole</span><span class="p">[]</span> <span class="o">=</span> <span class="s">"pole"</span><span class="p">;</span>
+  <span class="k">static</span> <span class="k">constexpr</span> <span class="k">const</span> <span class="kt">char</span> <span class="n">Post</span><span class="p">[]</span> <span class="o">=</span> <span class="s">"post"</span><span class="p">;</span>
+  <span class="k">static</span> <span class="k">constexpr</span> <span class="k">const</span> <span class="kt">char</span> <span class="n">Symbol</span><span class="p">[]</span> <span class="o">=</span> <span class="s">"symbol"</span><span class="p">;</span>
+  <span class="k">static</span> <span class="k">constexpr</span> <span class="k">const</span> <span class="kt">char</span> <span class="n">Start</span><span class="p">[]</span> <span class="o">=</span> <span class="s">"start"</span><span class="p">;</span>
+  <span class="k">static</span> <span class="k">constexpr</span> <span class="k">const</span> <span class="kt">char</span> <span class="n">End</span><span class="p">[]</span> <span class="o">=</span> <span class="s">"end"</span><span class="p">;</span>
+  <span class="k">static</span> <span class="k">constexpr</span> <span class="k">const</span> <span class="kt">char</span> <span class="n">Dot</span><span class="p">[]</span> <span class="o">=</span> <span class="s">"dot"</span><span class="p">;</span>
+</code></pre></div></div>
+<h3 id="2linestrings">2、Linestrings</h3>
+
+<p>线串是两个或者多个点通过线性插值生成的有序数组，用来描述地图元素的形状。线串可以是虚线，它可以通过高度离散化实现，来描述任何一维形式，并应用于地图上的任何可物理观察到的部分。与样条曲线相比，线串可以高效计算，并且可以用来描述尖角，最终转化为非线性微分方程的求解问题。line具有如下属性</p>
+
+<table>
+  <thead>
+    <tr>
+      <th><strong>type</strong></th>
+      <th><strong>subtype</strong></th>
+      <th><strong>description</strong></th>
+      <th><strong>lane change?</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>line_thin</td>
+      <td>solid</td>
+      <td>a solid lane marking</td>
+      <td>no</td>
+    </tr>
+    <tr>
+      <td>line_thin</td>
+      <td>solid_solid</td>
+      <td>a double solid lane marking</td>
+      <td>no</td>
+    </tr>
+    <tr>
+      <td>line_thin</td>
+      <td>dashed</td>
+      <td>a dashed lane marking</td>
+      <td>yes</td>
+    </tr>
+    <tr>
+      <td>line_thin</td>
+      <td>dashed_solid</td>
+      <td>a marking that is dashed on the left and solid on the right</td>
+      <td>left-&gt;right: yes</td>
+    </tr>
+    <tr>
+      <td>line_thin</td>
+      <td>solid_dashed</td>
+      <td>the other way around</td>
+      <td>right-&gt;left: yes</td>
+    </tr>
+    <tr>
+      <td>line_thick</td>
+      <td>same as above for thin</td>
+      <td> </td>
+      <td> </td>
+    </tr>
+    <tr>
+      <td>curbstone</td>
+      <td>high</td>
+      <td>a curbstone that is to high for a vehicle to drive over</td>
+      <td>no</td>
+    </tr>
+    <tr>
+      <td>curbstone</td>
+      <td>low</td>
+      <td>curb that is low and can be driven for a vehicle</td>
+      <td>no</td>
+    </tr>
+    <tr>
+      <td>virtual</td>
+      <td>-</td>
+      <td>a non-physical lane boundary, intended mainly for intersections</td>
+      <td>no</td>
+    </tr>
+    <tr>
+      <td>road_border</td>
+      <td>-</td>
+      <td>the end of the road.</td>
+      <td>no</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="3polygon">3、Polygon</h3>
+
+<p>多边形与线串非常相似，但形成一个Area。隐式假定多边形的第一个点和最后一个点被连接以闭合形状。</p>
+
+<p>多边形很少用于传输地图信息（交通标志除外）。相反，它们通常用作将有关区域的自定义信息添加到地图（例如，感兴趣区域）的一种手段。</p>
+
+<h3 id="4lanelets">4、Lanelets</h3>
+
+<p>Lanelets定义了发生定向运动时，地图车道的原子部分。原子表示沿当前lanelet行驶时，有效的交通规则不会改变，而且与其他Lanelet的拓扑关系也不会更改。</p>
+
+<p>lanelet可以引用表示适用于该lanelet的交通规则的regulatory elements。多个lanelet可以引用同一regElem。必须始终始终可以直接从车道上确定车道的当前速度限制。可以通过引用SpeedLimit监管元素或标记小车的位置来完成。在这种情况下，假定道路类型的最大速度（例如，如果位置是德国城市，则为最大50公里/小时）下图为道路的例子</p>
+
+<p><img src="/upload/2022-01-01/lanelet.png" alt="Lane" /></p>
+
+<h3 id="5areas">5、Areas</h3>
+
+<p>Areas是地图上没有方向或者是无法移动的部分区域，比如路标，停车位，绿化带等。他们由一条或者多条linestring组成的闭合的区域。Area也有相关联的regulatory elements。</p>
+
+<h3 id="6regelem-regulatory-elements-">6、regElem （Regulatory elements ）</h3>
+
+<p>regElem是表达交通规则的通用方式，它们由适用的lanelet或Area引用。在应用的时候，regElem 会和一个或者多个Lanelets、Areas相关联。regElem是动态变化的，意味着它只是在某些条件下是有效的。
+诸如限速，道路优先级规则、红绿灯等，交通规则有许多不同的类型，因此每个regElem的准确结构大都不一样。他们通常引用定义规则的元素（例如交通标志），并在必要时引用取消规则的元素（例如速度区末尾的标志）。下图为规则元素的例子</p>
+
+<p><img src="/upload/2022-01-01/regulatory_element.png" alt="regElem" /></p>
+
+<h4 id="参考文献">参考文献</h4>
+<p><a href="http://xb.chinasmp.com/article/2021/1001-1595/2021-11-1432.htm">通用化高精地图数据模型</a></p>
+
+        </article>
+        <hr>
+
+        
+        
+            
+            
+                
+                    
+                
+            
+        
+            
+            
+                
+                    
+                
+            
+        
+            
+            
+                
+                    
+                
+            
+        
+            
+            
+                
+                    
+                
+            
+        
+            
+            
+                
+                    
+                
+            
+        
+            
+            
+                
+                    
+                
+            
+        
+            
+            
+                
+                    
+                
+            
+        
+            
+            
+                
+                    
+                
+            
+        
+            
+            
+                
+                    
+                
+            
+        
+            
+            
+                
+                    
+                
+            
+        
+        
+
+        <div class="post-recent">
+    <div class="pre">
+        
+    </div>
+    <div class="nex">
+
+        
+        <p><strong>下一篇</strong> <a href="/2023/03/23/%E7%8A%B6%E6%80%81%E4%BC%B0%E8%AE%A1/">状态估计</a></p>
+        
+    </div>
+</div>
+
+
+        <h2 id="comments">Comments</h2>
+        
+
+
+<div id="disqus_thread"></div>
+<script>
+    /**
+     * RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+     * LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables
+     */
+
+    var disqus_config = function() {
+        this.page.url = 'http://localhost:4000/2022/01/01/LaneLet2%E7%AE%80%E4%BB%8B/'; // Replace PAGE_URL with your page's canonical URL variable
+        this.page.identifier = 'http://localhost:4000/2022/01/01/LaneLet2%E7%AE%80%E4%BB%8B/'; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+    };
+
+    (function() { // DON'T EDIT BELOW THIS LINE
+        var d = document,
+            s = d.createElement('script');
+
+        s.src = '//sugie.disqus.com/embed.js';
+
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+
+
+
+
+    </div>
+    <button class="anchor"><i class="fa fa-anchor"></i></button>
+    <div class="right">
+        <div class="wrap">
+
+            <!-- Content -->
+            <div class="side content">
+                <div>
+                    Content
+                </div>
+                <ul id="content-side" class="content-ul">
+                    
+                    <li><a href="#comments">Comments</a></li>
+                </ul>
+            </div>
+            <!-- 其他div框放到这里 -->
+            <!-- <div class="side">bbbb</div> -->
+        </div>
+    </div>
+</div>
+<script>
+/**
+ * target _blank
+ */
+(function() {
+    var aTags = document.querySelectorAll('article a:not([id])')
+    for (var i = 0; i < aTags.length; i++) {
+        aTags[i].setAttribute('target', '_blank')
+    }
+}());
+</script>
+<script src="/js/pageContent.js " charset="utf-8"></script>
+
+
+    <footer class="site-footer">
+
+
+    <div class="wrapper">
+
+        <p class="description">
+             本站记录我机器人学习之旅的沿途风景！ 
+        </p>
+        <p class="contact">
+            Contact me at: 
+            <a href="https://github.com/sugie-liu" title="GitHub"><i class="fa fa-github" aria-hidden="true"></i></a>  
+            <a href="mailto:75512524@qq.com" title="email"><i class="fa fa-envelope-o" aria-hidden="true"></i></a>        
+        </p>
+        <p>
+            本站总访问量<span id="busuanzi_value_site_pv"></span>次，本站访客数<span id="busuanzi_value_site_uv"></span>人次，本文总阅读量<span id="busuanzi_value_page_pv"></span>次
+        </p>
+        <p class="power">
+            <span>
+                Site powered by <a href="https://jekyllrb.com/">Jekyll</a> & <a href="https://pages.github.com/">Github Pages</a>.
+            </span>
+        </p>
+    </div>
+</footer>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+    <div class="back-to-top">
+    <a href="#top" data-scroll>
+        <i class="fa fa-arrow-up" aria-hidden="true"></i>
+    </a>
+</div>
+
+    <script src=" /js/main.js " charset="utf-8"></script>
+    <script src=" /js/smooth-scroll.min.js " charset="utf-8"></script>
+    <script type="text/javascript">
+      smoothScroll.init({
+        speed: 500, // Integer. How fast to complete the scroll in milliseconds
+        easing: 'easeInOutCubic', // Easing pattern to use
+        offset: 20, // Integer. How far to offset the scrolling anchor location in pixels
+      });
+    </script>
+    <!-- <script src=" /js/scroll.min.js " charset="utf-8"></script> -->
+  </body>
+
+</html>
